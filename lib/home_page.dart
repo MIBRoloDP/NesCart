@@ -392,7 +392,7 @@ class _homepageState extends State<homepage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => splashScreen()),
+                  MaterialPageRoute(builder: (context) => cart()),
                 );
               },
               icon: const Icon(Icons.shopping_cart, color: Colors.white, size: 30),

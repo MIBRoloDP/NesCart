@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -55,34 +57,34 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     final String imageUrl = widget.product['image'] ??
         'https://placehold.co/600x400/000000/FFFFFF?text=No+Image';
     final String title = widget.product['title'] ?? 'Product Name';
-    final String price = widget.product['price'] ?? '\$0.00';
+    final String price = widget.product['price'].toString() ?? '\$0.00';
     final String description = widget.product['description'] ??
         'Experience unmatched quality and style with this must-have item for your daily essentials.';
 
     return Scaffold(
       body: Stack(
         children: [
-          // ✅ Background Image
+
           Positioned.fill(
-            child: Image.network(
-              imageUrl,
+            child: Image.memory(
+              base64Decode(imageUrl),
               fit: BoxFit.cover,
             ),
           ),
 
-          // ✅ Dark overlay for readability
+
           Positioned.fill(
             child: Container(
               color: Colors.black.withOpacity(0.6),
             ),
           ),
 
-          // ✅ Page content
+
           Column(
             children: [
               const SizedBox(height: 50),
 
-              // ✅ Top App Bar
+
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Row(
@@ -102,7 +104,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
               const SizedBox(height: 20),
 
-              // ✅ Product Image
+
               Center(
                 child: Container(
                   padding: const EdgeInsets.all(16),
@@ -110,8 +112,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     color: Colors.transparent,
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Image.network(
-                    imageUrl,
+                  child: Image.memory(
+                    base64Decode(imageUrl),
                     height: 160,
                     width: 160,
                     fit: BoxFit.contain,
