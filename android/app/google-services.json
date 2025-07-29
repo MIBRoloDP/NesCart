@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "269142618349",
+    "project_id": "mibrolodp-5a2e5",
+    "storage_bucket": "mibrolodp-5a2e5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:269142618349:android:f9cdcc03ec329d9a87dce4",
+        "android_client_info": {
+          "package_name": "com.example.loginpage1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwW1SjqQFoX9M4AJbdiVtxmm1L7_3TUS8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
