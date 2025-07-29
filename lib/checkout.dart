@@ -229,7 +229,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
       );
     }
   }
-
   Future<bool> sendOrderEmail(List<Map<String, dynamic>> selectedItems) async {
     final String serviceId = 'service_al7vazj';
     final String templateId = 'template_flcr12v';
@@ -286,7 +285,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
       throw Exception('Failed to send email: ${response.body}');
     }
   }
-
   Future<void> saveOrderToFirestore() async {
     final user = FirebaseAuth.instance.currentUser;
     log(user!.uid.toString());
@@ -402,7 +400,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
       currentAddress = '${place.subLocality}, ${place.locality}, ${place.country}';
     });
   }
-
   Future<void> proceedToPayment() async {
     if (phoneController.text.isEmpty || emailController.text.isEmpty || selectedPaymentMethod == null) {
       ScaffoldMessenger.of(context).showSnackBar(
