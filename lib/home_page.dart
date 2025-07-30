@@ -28,6 +28,8 @@ class homepage extends StatefulWidget {
 }
 
 class _homepageState extends State<homepage> {
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _tabCategoriesKey = GlobalKey();
   List<bool> isFavoriteList = [];
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -137,8 +139,8 @@ class _homepageState extends State<homepage> {
             'id': productDoc.id,
             'image': productData['image'] ?? 'asset/drag.jpg',
             'name': productData['name'] ?? 'Product',
-            'currentPrice': '£${productData['price'] ?? '0'}',
-            'oldPrice': '£${productData['oldPrice'] ?? '0'}',
+            'currentPrice': 'Rs ${productData['price'] ?? '0'}',
+            'oldPrice': 'Rs ${productData['oldPrice'] ?? '0'}',
             'isFavorite': false,
             ...productData,
           };
@@ -314,7 +316,6 @@ class _homepageState extends State<homepage> {
     "Summer\nExclusive Deal\nUp to 50%",
     "Limited\nTime Offer\nUp to 60%",
   ];
-  final ScrollController _scrollController = ScrollController();
   final TextEditingController SearchController = TextEditingController();
   final FocusNode SearchFocusNode = FocusNode();
   bool isFocused = false;
@@ -680,28 +681,37 @@ class _homepageState extends State<homepage> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(top: 255, left: 16, right: 10),
+                        padding:  EdgeInsets.only(top: 255, left: 16, right: 10),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text(
+                                 Text(
                                   'Categories',
                                   style: TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                Row(
-                                  children: const [
-                                    Text(
-                                      'See all',
-                                      style: TextStyle(color: Colors.blue),
-                                    ),
-                                    Icon(Icons.arrow_forward_ios, size: 12),
-                                  ],
+                                GestureDetector(
+                                 onTap:  () {
+                                   Scrollable.ensureVisible(
+                                     _tabCategoriesKey.currentContext!,
+                                     duration: const Duration(milliseconds: 500),
+                                     curve: Curves.easeInOut,
+                                   );
+                                 },
+                                  child: Row(
+                                    children:  [
+                                      Text(
+                                        'See all',
+                                        style: TextStyle(color: Colors.blue),
+                                      ),
+                                      Icon(Icons.arrow_forward_ios, size: 12),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
@@ -744,6 +754,7 @@ class _homepageState extends State<homepage> {
                               child: ListView.builder(
                                 scrollDirection: Axis.horizontal,
                                 itemCount: firebaseCategories.length,
+
                                 itemBuilder: (context, index) {
                                   final item = firebaseCategories[index];
                                   return Padding(
@@ -899,12 +910,13 @@ class _homepageState extends State<homepage> {
                         const SizedBox(height: 10),
                         // Firebase Best Sellers
                         SizedBox(
-                          height: 230,
+                          height: 240,
                           child: ListView.builder(
                             scrollDirection: Axis.horizontal,
                             itemCount: firebaseBestSellers.length,
                             itemBuilder: (context, index) {
                               final product = firebaseBestSellers[index];
+
                               return GestureDetector(
                                 onTap: () {
                                   Navigator.push(
@@ -915,115 +927,108 @@ class _homepageState extends State<homepage> {
                                   );
                                 },
                                 child: Container(
-                                  width: 140,
+                                  width: 150,
                                   margin: const EdgeInsets.only(right: 16),
                                   decoration: BoxDecoration(
                                     border: Border.all(color: Colors.grey.shade300),
                                     borderRadius: BorderRadius.circular(12),
+                                    color: const Color(0xFFe8dfd4),
                                   ),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Stack(
                                         children: [
-                                          product['image'].isNotEmpty
-                                              ? Image.memory(
-                                           base64Decode( product["image"]!),
-                                            height: 130,
-                                            width: 140,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) {
-                                              return Container(
-                                                height: 130,
-                                                width: 140,
-                                                color: Colors.grey[300],
-                                                child: const Icon(Icons.image),
-                                              );
-                                            },
-                                          )
-                                              : Container(
-                                            height: 130,
-                                            width: 140,
-                                            color: Colors.grey[300],
-                                            child: const Icon(Icons.image),
+                                          ClipRRect(
+                                            borderRadius: const BorderRadius.only(
+                                              topLeft: Radius.circular(12),
+                                              topRight: Radius.circular(12),
+                                            ),
+                                            child: product['image'] != null && product['image'] != ""
+                                                ? Image.memory(
+                                              base64Decode(product["image"]),
+                                              height: 130,
+                                              width: 150,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (context, error, stackTrace) {
+                                                return Container(
+                                                  height: 130,
+                                                  width: 150,
+                                                  color: Colors.grey[300],
+                                                  child: const Icon(Icons.broken_image),
+                                                );
+                                              },
+                                            )
+                                                : Container(
+                                              height: 130,
+                                              width: 150,
+                                              color: Colors.grey[300],
+                                              child: const Icon(Icons.image),
+                                            ),
                                           ),
-                                          Positioned(
-                                            top: 8,
-                                            left: 8,
-                                            child: Container(
-                                              padding: const EdgeInsets.symmetric(
-                                                horizontal: 6,
-                                                vertical: 2,
-                                              ),
-                                              color: Colors.red,
-                                              child: Text(
-                                                product["discount"]!,
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 12,
+                                          if (product["discount"] != null && product["discount"].toString().isNotEmpty)
+                                            Positioned(
+                                              top: 8,
+                                              left: 8,
+                                              child: Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.red,
+                                                  borderRadius: BorderRadius.circular(4),
+                                                ),
+                                                child: Text(
+                                                  product["discount"].toString(),
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 12,
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                          ),
                                           Positioned(
-                                            top: 8,
-                                            right: 8,
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) => WishlistPage(wishlist: wishlist),
-                                                  ),
-                                                );
-                                              },
-                                              child:  IconButton(
-                                                icon: Icon(
-                                                  isInWishlist(product) ? Icons.favorite : Icons.favorite_border,
-                                                  size: 20,
-                                                  color: isInWishlist(product) ? Colors.red : Colors.black,
-                                                ),
-                                                onPressed: () {
-                                                  setState(() {
-                                                    if (isInWishlist(product)) {
-                                                      wishlist.removeWhere((item) => item['id'] == product['id']);
-                                                    } else {
-                                                      wishlist.add(product);
-                                                    }
-                                                  });
-                                                },
+                                            top: 0,
+                                            right: 0,
+                                            child: IconButton(
+                                              icon: Icon(
+                                                isInWishlist(product) ? Icons.favorite : Icons.favorite_border,
+                                                color: isInWishlist(product) ? Colors.red : Colors.black,
+                                                size: 20,
                                               ),
+                                              onPressed: () {
+                                                setState(() {
+                                                  if (isInWishlist(product)) {
+                                                    wishlist.removeWhere((item) => item['id'] == product['id']);
+                                                  } else {
+                                                    wishlist.add(product);
+                                                  }
+                                                });
+                                              },
                                             ),
                                           ),
                                         ],
                                       ),
                                       Padding(
-                                        padding: const EdgeInsets.all(8.0),
+                                        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6),
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              product["title"]!,
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                              ),
+                                              product["title"] ?? "Unnamed",
+                                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
                                             ),
+                                            const SizedBox(height: 4),
                                             const Row(
                                               children: [
-                                                Icon(
-                                                  Icons.star,
-                                                  size: 16,
-                                                  color: Colors.amber,
-                                                ),
-                                                Text(
-                                                  "4.8",
-                                                  style: TextStyle(fontSize: 12),
-                                                ),
+                                                Icon(Icons.star, size: 14, color: Colors.amber),
+                                                SizedBox(width: 4),
+                                                Text("4.8", style: TextStyle(fontSize: 12)),
                                               ],
                                             ),
                                             const SizedBox(height: 4),
                                             Text(
-                                              product["oldPrice"]!.toString(),
+                                              "Rs ${product["oldPrice"] ?? '0'}",
                                               style: const TextStyle(
                                                 fontSize: 12,
                                                 color: Colors.grey,
@@ -1031,9 +1036,12 @@ class _homepageState extends State<homepage> {
                                               ),
                                             ),
                                             Text(
-                                              product["price"]!.toString(),
-                                              style: const TextStyle(color: Colors.green),
-
+                                              "Rs ${product["price"] ?? '0'}",
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.green,
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -1045,53 +1053,57 @@ class _homepageState extends State<homepage> {
                             },
                           ),
                         ),
+
                         const SizedBox(height: 20),
                       ],
                     ),
                   ),
                   // Firebase Tab Categories
-                  SizedBox(
-                    height: 100,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: firebaseTabCategories.length,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      itemBuilder: (context, index) {
-                        final category = firebaseTabCategories[index];
-                        bool isSelected = _selected == index;
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _selected = index;
-                              });
-                            },
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                CircleAvatar(
-                                  radius: 22,
-                                  backgroundColor: isSelected
-                                      ? Colors.black
-                                      : const Color(0xFFe8dfd4),
-                                  child: Icon(
-                                    _getIconFromString(category['icon']),
-                                    color: isSelected
-                                        ? const Color(0xFFe8dfd4)
-                                        : Colors.black,
+                  Container(
+                    key:  _tabCategoriesKey,
+                    child: SizedBox(
+                      height: 100,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: firebaseTabCategories.length,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        itemBuilder: (context, index) {
+                          final category = firebaseTabCategories[index];
+                          bool isSelected = _selected == index;
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _selected = index;
+                                });
+                              },
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  CircleAvatar(
+                                    radius: 22,
+                                    backgroundColor: isSelected
+                                        ? Colors.black
+                                        : const Color(0xFFe8dfd4),
+                                    child: Icon(
+                                      _getIconFromString(category['icon']),
+                                      color: isSelected
+                                          ? const Color(0xFFe8dfd4)
+                                          : Colors.black,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  category["label"].toString(),
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                              ],
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    category["label"].toString(),
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
                   ),
                   // Products Grid for Selected Category
@@ -1226,7 +1238,7 @@ class _homepageState extends State<homepage> {
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
-                                          "Rs ${product['currentPrice'] ?? '0'}",
+                                          " ${product['currentPrice'] ?? '0'}",
                                           style: const TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.bold,
@@ -1252,10 +1264,17 @@ class _homepageState extends State<homepage> {
                       );
                     },
                   ),
+                  Padding(
+                    padding: EdgeInsets.only(right: 250,top: 20),
+                    child: Text(
+                      "All Products",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
 
                   // Firebase Products Stream
                   Container(
-                    height: 900,
+                    height: 1500,
                     width: 400,
                     child: StreamBuilder<QuerySnapshot>(
                       stream: FirebaseFirestore.instance.collection('products').snapshots(),
@@ -1392,9 +1411,9 @@ class _homepageState extends State<homepage> {
                                               color: Colors.black,
                                             ),
                                           ),
-                                          const Text(
-                                            "Rs 00",
-                                            style: TextStyle(
+                                          Text(
+                                          "Rs ${data['oldPrice'] ?? '0'}",
+                                            style: const TextStyle(
                                               fontSize: 12,
                                               color: Colors.grey,
                                               decoration: TextDecoration.lineThrough,
