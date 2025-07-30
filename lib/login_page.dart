@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:neskart/home_page.dart';
+import 'package:neskart/vendor/admin_dashboard.dart';
 import 'signup.dart';
 import 'bottom_nav.dart';
 import 'dart:developer';
@@ -41,18 +43,44 @@ class _LoginScreenState extends State<LoginScreen> {
         email: EmailController.text.trim(),
         password: PasswordController.text.trim(),
       );
+
       final User? user = userCredential.user;
+
       if (user != null) {
         log("User logged in: ${user.email}");
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => bottomnav()),
-        );
+
+        final DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+            .collection("users")
+            .doc(user.uid)
+            .get();
+
+        if (documentSnapshot.exists) {
+          final data = documentSnapshot.data() as Map<String, dynamic>;
+
+          log("Email from Firestore: ${data['email']}");
+
+          final bool isAdmin = data['admin'] == true;
+          final String isBlocked = data['status'];
+          
+       isBlocked=="Active"?
+       Navigator.push(
+         context,
+         MaterialPageRoute(
+           builder: (context) => isAdmin ? AdminDashboard() : bottomnav(),
+         ),
+       )
+           :   Fluttertoast.showToast(msg: "User blocked by admin, Contact IT Manager");
+        } else {
+          Fluttertoast.showToast(msg: "User document does not exist.");
+          log("Document not found for user: ${user.uid}");
+        }
       }
     } catch (e) {
       Fluttertoast.showToast(msg: "Login failed: ${e.toString()}");
+      log("Login error: $e");
     }
   }
+
   bool rememberMe = false;
 
   @override
@@ -185,9 +213,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             Checkbox(
                               value: rememberMe,
                               activeColor: Colors.black,
-                              onChanged: (bool? value) {
+                              onChanged: (bool? value) async{
+                                SharedPreferences prefs = await SharedPreferences.getInstance();
                                 setState(() {
+
                                   rememberMe = value ?? false;
+                                  prefs.setBool("remember_me", rememberMe);
+                                  log(rememberMe.toString());
                                 });
                               },
                             ),

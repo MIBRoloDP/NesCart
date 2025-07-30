@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:neskart/onboarding_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'home_page.dart';
 
@@ -13,14 +14,24 @@ class splashScreen extends StatefulWidget {
 }
 
 class _splashScreenState extends State<splashScreen> {
+bool? remember_me;
+void checkAuth()async{
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+  setState(() {
+    remember_me= preferences.getBool("remember_me")??false;
+  });
 
-
+}
   @override
   void initState() {
     super.initState();
-    Timer(Duration(seconds: 7),() {
+    checkAuth();
+    Timer(Duration(seconds: 3),() {
+      remember_me==false?
       Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (context)=> OnboardingPage()));
+          MaterialPageRoute(builder: (context)=> OnboardingPage()))
+          : Navigator.pushReplacement(context,
+          MaterialPageRoute(builder: (context)=> homepage()));
     });
 
   }
