@@ -59,7 +59,7 @@ class _ViewOrdersScreenState extends State<ViewOrdersScreen> {
                     children: [
                       const SizedBox(height: 4),
                       Text(
-                          'Items: ${order['items']?.length ?? 0} | Total: ₹${order['total'] ?? 0}'),
+                          'Items: ${order['items']?.length ?? 0} | Total: Rs ${order['total'] ?? 0}'),
                     ],
                   ),
                   trailing: _buildStatusBadge(order['status'] ?? 'Pending'),
