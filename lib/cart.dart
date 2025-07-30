@@ -110,9 +110,16 @@ class _CartPageState extends State<cart> {
     }
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         automaticallyImplyLeading: false,
-        title: const Text("My Cart"),
+        title: const Text("My Cart",
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 24
+        ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_forever),
@@ -218,7 +225,7 @@ class _CartPageState extends State<cart> {
                     Text(
                       "Total: Rs. ${totalPrice.toStringAsFixed(2)}",
                       style: const TextStyle(
-                        fontSize: 20,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

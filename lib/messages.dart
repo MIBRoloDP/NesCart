@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:neskart/support_chat.dart';
 
+import 'orderpage.dart';
+
 class MessageScreen extends StatefulWidget {
   @override
   State<MessageScreen> createState() => _MessageScreenState();
@@ -70,19 +72,22 @@ class _MessageScreenState extends State<MessageScreen> {
                   children: [
                     GestureDetector(
                       onTap: (){
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => SupportChatScreen(),
-                          ),
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => SupportChatScreen(),),
                         );
                       },
                       child: Icon(Icons.chat,
                       color: Colors.green,
                       ),
-                    ), Icon(Icons.inventory,
+                    ), GestureDetector(
+                      onTap: (){
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => OrderPage(),),
+                        );
+                      },
+                      child: Icon(Icons.inventory,
 
-                    color: Colors.blue,), Icon(Icons.flash_on,
+                      color: Colors.blue,),
+                    ),
+                    Icon(Icons.flash_on,
                     color: Colors.orange,
                     ), Icon(Icons.campaign,
                     color: Colors.pink
@@ -154,9 +159,19 @@ class _MessageScreenState extends State<MessageScreen> {
                                 return Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    _buildCategoryColumn(Icons.chat, Colors.green, "Chats", null, currentRadius, currentIconSize, currentTextSize),
-                                    _buildCategoryColumn(Icons.inventory, Colors.blue, "Orders", null, currentRadius, currentIconSize, currentTextSize),
-                                    _buildCategoryColumn(Icons.flash_on, Colors.orange, "Activities", "2", currentRadius, currentIconSize, currentTextSize),
+                                    GestureDetector(
+                                        onTap: (){
+                                          Navigator.push(context, MaterialPageRoute(builder: (context) => SupportChatScreen(),),
+                                          );
+                                        },
+                                        child: _buildCategoryColumn(Icons.chat, Colors.green, "Chats", null, currentRadius, currentIconSize, currentTextSize)),
+                                    GestureDetector(
+                                        onTap: (){
+                                          Navigator.push(context, MaterialPageRoute(builder: (context) => OrderPage(),),
+                                          );
+                                        },
+                                        child: _buildCategoryColumn(Icons.inventory, Colors.blue, "Orders", null, currentRadius, currentIconSize, currentTextSize)),
+                                    _buildCategoryColumn(Icons.flash_on, Colors.orange, "Activities", null, currentRadius, currentIconSize, currentTextSize),
                                     _buildCategoryColumn(Icons.campaign, Colors.pink, "Promos", "dot", currentRadius, currentIconSize, currentTextSize),
                                   ],
                                 );

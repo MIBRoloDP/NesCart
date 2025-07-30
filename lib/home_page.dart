@@ -739,33 +739,35 @@ class _homepageState extends State<homepage> {
 
                                         switch (item['name']) {
                                           case 'Food':
-                                            Navigator.push(context, MaterialPageRoute(
-                                              builder: (context) => cart(),
-                                            ));
+                                            // Navigator.push(context, MaterialPageRoute(
+                                            //   builder: (context) => cart(),
+                                            // ));
                                             break; case 'Audio':
-                                            Navigator.push(context, MaterialPageRoute(
-                                              builder: (context) => cart(),
-                                            ));
+                                            // Navigator.push(context, MaterialPageRoute(
+                                            //   builder: (context) => cart(),
+                                            // ));
                                             break; case 'Furniture':
-                                            Navigator.push(context, MaterialPageRoute(
-                                              builder: (context) => cart(),
-                                            ));
+                                            // Navigator.push(context, MaterialPageRoute(
+                                            //   builder: (context) => cart(),
+                                            // ));
                                             break;
                                           case 'Device':
-                                            Navigator.push(context, MaterialPageRoute(
-                                              builder: (context) => cart(),
-                                            ));
+                                            // Navigator.push(context, MaterialPageRoute(
+                                            //   builder: (context) => cart(),
+                                            // ));
                                             break;
                                           case 'Discount':
-                                            Navigator.push(context, MaterialPageRoute(
-                                              builder: (context) => LoginScreen(),
-                                            )); case 'Gaming':
-                                            Navigator.push(context, MaterialPageRoute(
-                                              builder: (context) => LoginScreen(),
-                                            )); case 'Bike':
-                                            Navigator.push(context, MaterialPageRoute(
-                                              builder: (context) => LoginScreen(),
-                                            ));
+                                            // Navigator.push(context, MaterialPageRoute(
+                                            //   builder: (context) => LoginScreen(),
+                                            // ));
+                                          case 'Gaming':
+                                            // Navigator.push(context, MaterialPageRoute(
+                                            //   builder: (context) => LoginScreen(),
+                                            // ));
+                                            case 'Bike':
+                                            // Navigator.push(context, MaterialPageRoute(
+                                            //   builder: (context) => LoginScreen(),
+                                            // ));
                                             break;
                                           default:
                                             ScaffoldMessenger.of(context).showSnackBar(
@@ -1249,7 +1251,7 @@ class _homepageState extends State<homepage> {
 
                   // Firebase Products Stream
                   Container(
-                    height: 1500,
+                    height: 1650,
                     width: 400,
                     child: StreamBuilder<QuerySnapshot>(
                       stream: FirebaseFirestore.instance.collection('products').snapshots(),

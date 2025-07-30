@@ -21,7 +21,7 @@ class _bottomnavState extends State<bottomnav> {
     homepage(),
     MessageScreen(),
     cart(),
-   ModernProfilePage(),
+   ProfilePage(),
   ];
 
   final List<IconData> _icons = [

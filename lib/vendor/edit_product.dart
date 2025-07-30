@@ -196,8 +196,10 @@ class _EditProductPageState extends State<EditProductPage> {
               // Image picker
               ElevatedButton.icon(
                 onPressed: _pickImage,
-                icon: const Icon(Icons.image),
-                label: const Text('Change Product Image'),
+                icon:  Icon(Icons.image,color: Colors.black,),
+                label:  Text('Change Product Image', style: TextStyle(
+                  color: Colors.black,
+                ),),
               ),
               if (_base64Image != null)
                 Padding(
@@ -264,7 +266,10 @@ class _EditProductPageState extends State<EditProductPage> {
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                child: const Text('Save Product'),
+                child: const Text('Save Product', style: TextStyle(
+                  color: Colors.white,
+                ),
+               ),
               ),
             ],
           ),

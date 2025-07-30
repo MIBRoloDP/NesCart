@@ -713,7 +713,7 @@ class _AdminAddItemsPageState extends State<AdminAddItemsPage>
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Form(
-        key: _tabCategoryFormKey,
+         key: _tabCategoryFormKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -752,9 +752,9 @@ class _AdminAddItemsPageState extends State<AdminAddItemsPage>
                 return null;
               },
             ),
-            const SizedBox(height: 20),
+             SizedBox(height: 20),
             const Text('Select Icon:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-            const SizedBox(height: 10),
+             SizedBox(height: 10),
             Container(
               height: 300,
               child: GridView.builder(
@@ -799,7 +799,7 @@ class _AdminAddItemsPageState extends State<AdminAddItemsPage>
                 },
               ),
             ),
-            const SizedBox(height: 30),
+             SizedBox(height: 30),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(

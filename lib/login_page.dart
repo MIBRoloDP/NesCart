@@ -352,16 +352,48 @@ class _LoginScreenState extends State<LoginScreen> {
           stickyAuth: true,
         ),
       );
+
       if (didAuthenticate) {
-        log("logged in");
-      }
-      if (didAuthenticate) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => homepage()),
-        );
+        final User? user = FirebaseAuth.instance.currentUser;
+
+        if (user != null) {
+          log("User authenticated: ${user.email}");
+
+          final DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+              .collection("users")
+              .doc(user.uid)
+              .get();
+
+          if (documentSnapshot.exists) {
+            final data = documentSnapshot.data() as Map<String, dynamic>;
+
+            log("Email from Firestore: ${data['email']}");
+
+            final bool isAdmin = data['admin'] == true;
+            final String isBlocked = data['status'] ?? 'Active';
+
+            if (isBlocked == "Active") {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => isAdmin ? AdminDashboard() : bottomnav(),
+                ),
+              );
+            } else {
+              Fluttertoast.showToast(
+                msg: "User blocked by admin. Contact IT Manager",
+                toastLength: Toast.LENGTH_LONG,
+                gravity: ToastGravity.CENTER,
+              );
+            }
+          } else {
+            Fluttertoast.showToast(msg: "User document does not exist.");
+            log("Firestore document not found for user: ${user.uid}");
+          }
+        } else {
+          Fluttertoast.showToast(msg: "No authenticated user found.");
+        }
       } else {
-        // Optional: Show error or retry
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Authentication failed')),
         );
@@ -370,7 +402,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (e.code == 'LockedOut') {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
+            content: const Text(
               "Too many failed attempts. Please try again in 30 seconds.",
               style: TextStyle(color: Colors.white),
             ),
@@ -381,6 +413,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     }
   }
+
   Future<void> _checkBiometrics() async {
     try {
       _canCheckBiometrics = await auth.canCheckBiometrics;

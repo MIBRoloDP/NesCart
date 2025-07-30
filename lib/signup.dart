@@ -25,9 +25,8 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _obscureP = true;
   bool _obscureCP = true;
 
-  Future<void> registerUser(String email,String password, String name) async {
+  Future<void> registerUser(String email, String password, String name) async {
     try {
-
       final UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
@@ -36,58 +35,59 @@ class _SignupScreenState extends State<SignupScreen> {
       final User? user = userCredential.user;
 
       if (user != null) {
-        await _firestore.collection('users').doc(user.uid).set(
-            {
-              'uid': user.uid,
-              'email': user.email,
-              'name': name,
-              'role': _isAdmin ? 'admin' : 'user',
-              'status':"Active",
-              'admin': _isAdmin,
+        print("User created: ${user.uid}");
 
+        try {
+          await _firestore.collection('users').doc(user.uid).set({
+            'uid': user.uid,
+            'email': user.email,
+            'name': name,
+            'role': _isAdmin ? 'admin' : 'user',
+            'status': "Active",
+            'admin': _isAdmin,
+          });
 
-            });
-
-        Fluttertoast.showToast(msg: "User registered and added to Firestore");
+          Fluttertoast.showToast(msg: "User registered and added to Firestore");
+          clearFields();
+        } catch (firestoreError) {
+          print(" Firestore write failed: $firestoreError");
+          Fluttertoast.showToast(msg: "Error writing to Firestore");
+        }
       }
-    } catch (e, stacktrace) {
-      print("Registration Error: $e");
-      print("StackTrace: $stacktrace");
+    } catch (e) {
+
+      Fluttertoast.showToast(msg: "Registration failed: $e");
     }
   }
 
-  void _Validationb(){
-    if (PasswordController.text!=ConfirmPasswordController.text)
-    {
-      Fluttertoast.showToast(msg: "Passwords are not same ");
 
-    }
-    else if (EmailController.text.isEmpty)
-    {
+  void _Validationb() async {
+    if (PasswordController.text != ConfirmPasswordController.text) {
+      Fluttertoast.showToast(msg: "Passwords are not same");
+    } else if (EmailController.text.isEmpty) {
       Fluttertoast.showToast(msg: "Please Enter your Email");
-    }
-    else if (NameController.text.isEmpty)
-    {
-      Fluttertoast.showToast(msg: "Please Enter your Full Name ");
-
-    }
-    else if (PasswordController.text.isEmpty)
-    {
-      Fluttertoast.showToast(msg: "Please enter the password ");
-
-    }
-    else if (ConfirmPasswordController.text.isEmpty)
-    {
-      Fluttertoast.showToast(msg: "Please enter the password ");
-
-    }
-    else
-    {
-      registerUser(EmailController.text,PasswordController.text,NameController.text);
-      Fluttertoast.showToast(msg: "Welcome");
+    } else if (NameController.text.isEmpty) {
+      Fluttertoast.showToast(msg: "Please Enter your Full Name");
+    } else if (PasswordController.text.isEmpty) {
+      Fluttertoast.showToast(msg: "Please enter the password");
+    } else if (ConfirmPasswordController.text.isEmpty) {
+      Fluttertoast.showToast(msg: "Please enter the password");
+    } else {
+      await registerUser(EmailController.text, PasswordController.text, NameController.text);
     }
   }
 
+  void clearFields() {
+    EmailController.clear();
+    PasswordController.clear();
+    NameController.clear();
+    ConfirmPasswordController.clear();
+    setState(() {
+      _isAdmin = false;
+      _obscureP = true;
+      _obscureCP = true;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
