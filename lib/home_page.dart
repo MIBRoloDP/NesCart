@@ -6,6 +6,7 @@ import 'package:neskart/cart.dart';
 import 'package:neskart/Profile_page.dart';
 import 'package:neskart/login_page.dart';
 import 'package:neskart/product_detail.dart' show ProductDetailPage;
+import 'package:neskart/searchPage.dart';
 import 'package:neskart/splash_screen.dart';
 
 import 'package:neskart/wishlist.dart';
@@ -358,51 +359,76 @@ class _homepageState extends State<homepage> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 85,
-        title: Padding(
-          padding: const EdgeInsets.all(0.0),
-          child: TextFormField(
-            style: const TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-            ),
-            controller: SearchController,
-            focusNode: SearchFocusNode,
-            decoration: InputDecoration(
-              hintText: 'Search',
-              hintStyle: const TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+        title: Container(
+          width: MediaQuery.of(context).size.width/1.5,
+          height: 50,
+
+          child: GestureDetector(
+            onTap: (){
+              Navigator.push(context, MaterialPageRoute(builder: (context)=>Searchpage()));
+            },
+            child: Card(
+              color: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.only(top:12.0,left: 10),
+                child: Text("Enter to Search"),
               ),
-              prefixIcon: const Icon(Icons.search, color: Colors.black),
-              suffixIcon: (isFocused)
-                  ? IconButton(
-                icon: const Icon(Icons.clear, color: Colors.black),
-                onPressed: () {
-                  SearchController.clear();
-                  FocusScope.of(context).unfocus();
-                },
-              )
-                  : null,
-              filled: true,
-              fillColor: const Color(0xFFe8dfd4),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(
-                  color: Colors.grey.shade900,
-                  width: 1.5,
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: const BorderSide(
-                  color: Colors.white,
-                  width: 2.0,
-                ),
-              ),
+
             ),
           ),
         ),
+        // Padding(
+        //   padding: const EdgeInsets.all(0.0),
+        //   child: GestureDetector(
+        //     onTap: (){
+        //
+        //     },
+        //     child: TextFormField(
+        //       style: const TextStyle(
+        //         color: Colors.black,
+        //         fontWeight: FontWeight.bold,
+        //       ),
+        //       controller: SearchController,
+        //       readOnly: true,
+        //       focusNode: SearchFocusNode,
+        //       decoration: InputDecoration(
+        //         hintText: 'Search',
+        //         hintStyle: const TextStyle(
+        //           color: Colors.black,
+        //           fontWeight: FontWeight.bold,
+        //           fontSize: 16,
+        //         ),
+        //         prefixIcon: const Icon(Icons.search, color: Colors.black),
+        //         suffixIcon: (isFocused)
+        //             ? IconButton(
+        //           icon: const Icon(Icons.clear, color: Colors.black),
+        //           onPressed: () {
+        //
+        //             SearchController.clear();
+        //             FocusScope.of(context).unfocus();
+        //           },
+        //         )
+        //             : null,
+        //         filled: true,
+        //         fillColor: const Color(0xFFe8dfd4),
+        //         enabledBorder: OutlineInputBorder(
+        //           borderRadius: BorderRadius.circular(15),
+        //           borderSide: BorderSide(
+        //             color: Colors.grey.shade900,
+        //             width: 1.5,
+        //           ),
+        //         ),
+        //         focusedBorder: OutlineInputBorder(
+        //           borderRadius: BorderRadius.circular(15),
+        //           borderSide: const BorderSide(
+        //             color: Colors.white,
+        //             width: 2.0,
+        //           ),
+        //         ),
+        //       ),
+        //     ),
+        //   ),
+        // ),
         actions: [
 
           Padding(
