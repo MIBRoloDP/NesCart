@@ -1,10 +1,10 @@
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:geocoding/geocoding.dart';
 
 class OrderDetailScreen extends StatefulWidget {
@@ -25,8 +25,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   final List<String> _statuses = [
     'Pending',
     'Processing',
-    'Out for Delivery',
     'Delivered',
+    'Shipped',
     'Cancelled',
   ];
 
@@ -88,6 +88,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   }
 
 
+
   Future<void> _getAddressFromLatLng(double lat, double lng) async {
     try {
       final placemarks = await placemarkFromCoordinates(lat, lng);
@@ -138,6 +139,71 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     setState(() => _isSaving = false);
   }
 
+  //Dialog Box to Delete Order yeta
+  void _confirmDelete() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Order'),
+        content: const Text('Are you sure you want to delete this order?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(
+              color: Colors.black,
+            ),),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () {
+              Navigator.pop(context);
+              _deleteOrder();
+            },
+            child: const Text('Delete', style: TextStyle(
+              color: Colors.white,
+            ),),
+          ),
+        ],
+      ),
+    );
+  }
+
+  //Firebase bata delete garne function
+  Future<void> _deleteOrder() async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('orders')
+          .doc(widget.orderId)
+          .delete();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Order deleted successfully')),
+      );
+
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error deleting order: $e')),
+      );
+    }
+  }
+// //For the Map to open Google map
+//   Future<void> _openMapInBrowser(double lat, double lng) async {
+//     final Uri mapsUri = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
+//
+//     if (await canLaunchUrl(mapsUri)) {
+//       await launchUrl(mapsUri, mode: LaunchMode.externalApplication);
+//     }  else {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         const SnackBar(content: Text('Could not open Google Maps')),
+//       );
+//     }
+//   }
+
+
+
+
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -155,17 +221,18 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     );
 
     return Scaffold(
+      backgroundColor: Color(0xFFe8dfd4),
       appBar: AppBar(
-        iconTheme: IconThemeData(
-          color: Colors.white,
-        ),
-          backgroundColor: Colors.black,
-          title: Text('Order #${widget.orderId}', style: TextStyle(
-            color: Colors.white,
-
-          ),),
+        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: Colors.black,
+        title: Text('Order #${widget.orderId}', style: const TextStyle(color: Colors.white)),
         centerTitle: true,
-
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.white),
+            onPressed: _confirmDelete,
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -212,6 +279,19 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 ],
               ),
             ),
+            // const SizedBox(height: 8),
+            // ElevatedButton.icon(
+            //   onPressed: () {
+            //     _openMapInBrowser(deliveryLatLng.latitude, deliveryLatLng.longitude);
+            //   },
+            //   icon: const Icon(Icons.directions),
+            //   label: const Text('Open in Google Maps'),
+            //   style: ElevatedButton.styleFrom(
+            //     backgroundColor: Colors.black,
+            //     foregroundColor: Colors.white,
+            //   ),
+            // ),
+
 
             const SizedBox(height: 24),
             const Text('Items:', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -274,7 +354,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               onPressed: _isSaving ? null : _saveChanges,
               child: _isSaving
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text('Save Status'),
+                  : const Text('Save Status', style: TextStyle(
+                color: Colors.black
+              ),),
             ),
           ],
         ),

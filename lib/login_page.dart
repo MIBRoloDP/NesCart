@@ -60,9 +60,10 @@ class _LoginScreenState extends State<LoginScreen> {
           log("Email from Firestore: ${data['email']}");
 
           final bool isAdmin = data['admin'] == true;
-          final String isBlocked = data['status'];
-          
-       isBlocked=="Active"?
+          final String isBlocked = data['status'] ?? 'Active';
+
+
+          isBlocked=="Active"?
        Navigator.push(
          context,
          MaterialPageRoute(

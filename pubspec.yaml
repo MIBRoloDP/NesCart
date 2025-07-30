@@ -52,7 +52,7 @@ dependencies:
   image_picker:
   cloud_firestore:
   fluttertoast:
-
+  url_launcher: ^6.2.5
   #  google_mobile_ads:
   flutter_vector_icons:
   flutter:

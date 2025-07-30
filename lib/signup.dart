@@ -41,7 +41,7 @@ class _SignupScreenState extends State<SignupScreen> {
               'uid': user.uid,
               'email': user.email,
               'name': name,
-              'role': user,
+              'role': _isAdmin ? 'admin' : 'user',
               'status':"Active",
               'admin': _isAdmin,
 
