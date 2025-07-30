@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:neskart/support_chat.dart';
-
+import 'activities_page.dart';
+import 'coupon_page.dart';
 import 'orderpage.dart';
 
 class MessageScreen extends StatefulWidget {
@@ -72,10 +73,10 @@ class _MessageScreenState extends State<MessageScreen> {
                   children: [
                     GestureDetector(
                       onTap: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => SupportChatScreen(),),
+                        Navigator.push(context, MaterialPageRoute(builder: (context) =>  supportPage(),),
                         );
                       },
-                      child: Icon(Icons.chat,
+                      child: Icon(Icons.support_agent,
                       color: Colors.green,
                       ),
                     ), GestureDetector(
@@ -87,10 +88,18 @@ class _MessageScreenState extends State<MessageScreen> {
 
                       color: Colors.blue,),
                     ),
-                    Icon(Icons.flash_on,
-                    color: Colors.orange,
-                    ), Icon(Icons.campaign,
-                    color: Colors.pink
+                    GestureDetector(onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => SalesDashboardPage(),),
+                      );
+                    },
+                      child: Icon(Icons.flash_on,
+                      color: Colors.orange,
+                      ),
+                    ), GestureDetector(
+              onTap: (){  Navigator.push(context, MaterialPageRoute(builder: (context) =>  CouponsPage()));},
+                      child: Icon(Icons.campaign,
+                      color: Colors.pink
+                      ),
                     ),
                   ],
                 ),
@@ -141,7 +150,7 @@ class _MessageScreenState extends State<MessageScreen> {
                               builder: (context, child) {
                                 final settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
                                 if (settings == null) {
-                                  return const SizedBox.shrink(); // Or a default row
+                                  return const SizedBox.shrink();
                                 }
                                 final double deltaExtent = settings.maxExtent - settings.minExtent;
                                 final double t = deltaExtent > 0 ? ((settings.currentExtent - settings.minExtent) / deltaExtent).clamp(0.0, 1.0) : 0.0;
@@ -161,18 +170,27 @@ class _MessageScreenState extends State<MessageScreen> {
                                   children: [
                                     GestureDetector(
                                         onTap: (){
-                                          Navigator.push(context, MaterialPageRoute(builder: (context) => SupportChatScreen(),),
+                                          Navigator.push(context, MaterialPageRoute(builder: (context) =>  supportPage()),
                                           );
                                         },
-                                        child: _buildCategoryColumn(Icons.chat, Colors.green, "Chats", null, currentRadius, currentIconSize, currentTextSize)),
+                                        child: _buildCategoryColumn(Icons.support_agent, Colors.green, "Support", null, currentRadius, currentIconSize, currentTextSize)),
                                     GestureDetector(
                                         onTap: (){
                                           Navigator.push(context, MaterialPageRoute(builder: (context) => OrderPage(),),
                                           );
                                         },
                                         child: _buildCategoryColumn(Icons.inventory, Colors.blue, "Orders", null, currentRadius, currentIconSize, currentTextSize)),
-                                    _buildCategoryColumn(Icons.flash_on, Colors.orange, "Activities", null, currentRadius, currentIconSize, currentTextSize),
-                                    _buildCategoryColumn(Icons.campaign, Colors.pink, "Promos", "dot", currentRadius, currentIconSize, currentTextSize),
+                                    GestureDetector(
+                                        onTap: (){
+                                          Navigator.push(context, MaterialPageRoute(builder: (context) => SalesDashboardPage(),),
+                                          );
+                                        },
+                                        child: _buildCategoryColumn(Icons.flash_on, Colors.orange, "Activities", null, currentRadius, currentIconSize, currentTextSize)),
+                                    GestureDetector(  onTap: (){
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => CouponsPage(),),
+                                      );
+                                    },
+                                        child: _buildCategoryColumn(Icons.campaign, Colors.pink, "Promos", "dot", currentRadius, currentIconSize, currentTextSize)),
                                   ],
                                 );
                               },
@@ -199,20 +217,19 @@ class _MessageScreenState extends State<MessageScreen> {
           SliverList(
             delegate: SliverChildBuilderDelegate(
                   (context, index) {
-                // ... (your message card building logic) ...
                 if (index == 0) {
                   return _buildMessageCard(
                     "Study & Work Essential😍",
-                    "FLAT 10% OFF + FREE Delivery on all Deli products🥰💖",
+                    "FLAT 10% OFF + FREE Delivery on all products🥰💖",
                     "5 minutes ago",
-                    "https://images.unsplash.com/photo-1516888531328-d33c9aa594a7?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8ZHJhZ29uJTVDfGVufDB8fDB8fHww",
+                    "https://images.unsplash.com/photo-1555529669-2269763671c0?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHNob3BwaW5nfGVufDB8fDB8fHww",
                   );
                 } else if (index == 1) {
                   return _buildMessageCard(
                     "Transform Your Skin with Rohto🌟",
                     "With up to 30% OFF on all your favorite products🧖‍♀️💖",
                     "13:30 PM",
-                    "https://images.unsplash.com/photo-1516888531328-d33c9aa594a7?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8ZHJhZ29uJTVDfGVufDB8fDB8fHww",
+                    "https://plus.unsplash.com/premium_photo-1672883552013-506440b2f11c?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8ZWNvbW1lcmNlJTIwb2ZmZXJzfGVufDB8fDB8fHww",
                   );
                 } else {
                   return _buildMessageCard(
@@ -223,7 +240,7 @@ class _MessageScreenState extends State<MessageScreen> {
                   );
                 }
               },
-              childCount: 5,
+              childCount: 3,
             ),
           ),
           SliverToBoxAdapter(
@@ -233,11 +250,8 @@ class _MessageScreenState extends State<MessageScreen> {
       ),
     );
   }
-
-  // Helper method to build category columns
   Widget _buildCategoryColumn(IconData icon, Color color, String text, String? notificationCount, double radius, double iconSize, double textSize) {
-    // Only show if the size is meaningful
-    if (radius <= 0 || iconSize <= 0) { // Text can disappear (size 0)
+    if (radius <= 0 || iconSize <= 0) {
       return const SizedBox.shrink();
     }
     return Column(
@@ -247,15 +261,15 @@ class _MessageScreenState extends State<MessageScreen> {
             CircleAvatar(
               backgroundColor: color.withOpacity(0.2),
               radius: radius, // Use dynamic radius
-              child: Icon(icon, color: color, size: iconSize), // Use dynamic iconSize
+              child: Icon(icon, color: color, size: iconSize),
             ),
-            if (notificationCount != null && radius > (22 * 0.5)) // Only show notification if icon is large enough
+            if (notificationCount != null && radius > (22 * 0.5))
               Positioned(
                 right: 0,
                 top: 0,
                 child: notificationCount == "dot"
                     ? Container(
-                  width: radius * 0.4, // Scale dot size with radius
+                  width: radius * 0.4,
                   height: radius * 0.4,
                   decoration: const BoxDecoration(
                     color: Colors.red,
@@ -263,7 +277,7 @@ class _MessageScreenState extends State<MessageScreen> {
                   ),
                 )
                     : Container(
-                  padding: EdgeInsets.all(radius * 0.18), // Scale padding
+                  padding: EdgeInsets.all(radius * 0.18),
                   decoration: const BoxDecoration(
                     color: Colors.red,
                     shape: BoxShape.circle,
@@ -271,7 +285,7 @@ class _MessageScreenState extends State<MessageScreen> {
                   child: Text(
                     notificationCount,
                     style: TextStyle(
-                        fontSize: radius * 0.4, // Scale font size with radius
+                        fontSize: radius * 0.4,
                         color: Colors.white,
                         fontWeight: FontWeight.bold),
                   ),
@@ -279,17 +293,15 @@ class _MessageScreenState extends State<MessageScreen> {
               ),
           ],
         ),
-        SizedBox(height: textSize > 0 ? 4 : 0), // Adjust spacing based on text visibility
-        if (textSize > 0) // Only show text if size is meaningful
+        SizedBox(height: textSize > 0 ? 4 : 0),
+        if (textSize > 0)
           Text(
             text,
-            style: TextStyle(fontSize: textSize), // Use dynamic textSize
+            style: TextStyle(fontSize: textSize),
           ),
       ],
     );
   }
-
-  // Helper method to build message cards (unchanged from previous)
   Widget _buildMessageCard(String title, String content, String time, String imageUrl) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

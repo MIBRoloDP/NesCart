@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:neskart/support_chat.dart';
+import 'coupon_page.dart';
 import 'orderpage.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -97,10 +99,32 @@ class _ProfilePageState extends State<ProfilePage> {
                       onTap: () {},
                     ),
                     _buildProfileOption(
+                      icon: Icons.support_agent,
+                      label: 'Customer Support',
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) =>  supportPage(),),
+                        );
+                      },
+                    ),
+                    _buildProfileOption(
                       icon: Icons.shopping_bag,
                       label: 'My Orders',
                       onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => const OrderPage()));
+                        Navigator.push(context, MaterialPageRoute(builder: (context) =>  OrderPage()));
+                      },
+                    ),
+                    _buildProfileOption(
+                      icon: Icons.card_giftcard,
+                      label: 'Offers',
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) =>  CouponsPage()));
+                      },
+                    ),
+                    _buildProfileOption(
+                      icon: Icons.settings,
+                      label: 'Settings',
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder:(context)=> OrderPage()));
                       },
                     ),
                     const SizedBox(height: 12),
