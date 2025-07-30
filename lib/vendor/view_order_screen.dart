@@ -13,6 +13,7 @@ class _ViewOrdersScreenState extends State<ViewOrdersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFe8dfd4),
       appBar: AppBar(
         title: const Text('View Orders'),
         backgroundColor: Colors.black,
@@ -79,13 +80,13 @@ class _ViewOrdersScreenState extends State<ViewOrdersScreen> {
         color = Colors.orange;
         break;
       case 'Processing':
-        color = Colors.blueGrey;
-        break;
-      case 'Out for Delivery':
         color = Colors.blue;
         break;
       case 'Delivered':
         color = Colors.green;
+        break;
+        case 'Shipped':
+        color = Colors.teal;
         break;
       case 'Cancelled':
         color = Colors.red;

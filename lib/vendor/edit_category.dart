@@ -106,6 +106,7 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFe8dfd4),
       appBar: AppBar(
         centerTitle: true,
         title: Text(

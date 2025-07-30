@@ -93,19 +93,44 @@ class _AdminAddItemsPageState extends State<AdminAddItemsPage>
 
   Future<void> _loadCategories() async {
     try {
-      final snapshot = await _firestore.collection('tab_categories').get();
+      final collections = {
+        'categories': 'Categories',
+        'flash_categories': 'Flash Categories',
+        'tab_categories': 'Tabbed Categories',
+      };
+
+      List<Map<String, dynamic>> allItems = [];
+
+      for (final entry in collections.entries) {
+        final snapshot = await _firestore.collection(entry.key).get();
+
+        // HEader(Non_selectable)
+        allItems.add({
+          'isHeader': true,
+          'label': entry.value,
+        });
+
+        final items = snapshot.docs.map((doc) {
+          final data = doc.data();
+          return {
+            'id': doc.id,
+            'name': data['name'] ?? 'Unnamed',
+            'source': entry.key,
+            'isHeader': false,
+          };
+        }).toList();
+
+        allItems.addAll(items);
+      }
+
       setState(() {
-        _availableCategories = snapshot.docs
-            .map((doc) => {
-          'id': doc.id,
-          'name': doc.data()['name'] ?? 'Unnamed Category',
-        })
-            .toList();
+        _availableCategories = allItems;
       });
     } catch (e) {
       _showSnackBar('Error loading categories: $e', isError: true);
     }
   }
+
 
   Future<String?> _uploadImageToBase64(XFile imageFile) async {
     try {
@@ -268,6 +293,7 @@ class _AdminAddItemsPageState extends State<AdminAddItemsPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFe8dfd4),
       appBar: AppBar(
         title: const Text('Admin - Add Items', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black,
@@ -328,7 +354,7 @@ class _AdminAddItemsPageState extends State<AdminAddItemsPage>
             const Text('Select Icon:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
             const SizedBox(height: 10),
             Container(
-              height: 120,
+              height: 300,
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 4,
@@ -346,8 +372,9 @@ class _AdminAddItemsPageState extends State<AdminAddItemsPage>
                       });
                     },
                     child: Container(
+
                       decoration: BoxDecoration(
-                        color: isSelected ? const Color(0xFFe8dfd4) : Colors.grey[200],
+                        color: isSelected ? const Color(0xFFD2BBA3) : Colors.grey[200],
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: isSelected ? Colors.black : Colors.grey,
@@ -616,6 +643,19 @@ class _AdminAddItemsPageState extends State<AdminAddItemsPage>
                 prefixIcon: Icon(Icons.category),
               ),
               items: _availableCategories.map((category) {
+                if (category['isHeader'] == true) {
+                  return DropdownMenuItem<String>(
+                    enabled: false,
+                    child: Text(
+                      category['label'],
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  );
+                }
+
                 return DropdownMenuItem<String>(
                   value: category['id'],
                   child: Text(category['name']),
@@ -633,6 +673,7 @@ class _AdminAddItemsPageState extends State<AdminAddItemsPage>
                 return null;
               },
             ),
+
             const SizedBox(height: 16),
             Row(
               children: [
@@ -715,7 +756,7 @@ class _AdminAddItemsPageState extends State<AdminAddItemsPage>
             const Text('Select Icon:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
             const SizedBox(height: 10),
             Container(
-              height: 120,
+              height: 300,
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 4,
@@ -734,7 +775,7 @@ class _AdminAddItemsPageState extends State<AdminAddItemsPage>
                     },
                     child: Container(
                       decoration: BoxDecoration(
-                        color: isSelected ? const Color(0xFFe8dfd4) : Colors.grey[200],
+                        color: isSelected ? const Color(0xFFD2BBA3) : Colors.grey[200],
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: isSelected ? Colors.black : Colors.grey,

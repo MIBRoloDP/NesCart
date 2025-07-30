@@ -288,6 +288,7 @@ class _ManageItemsScreenState extends State<ManageItemsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFe8dfd4),
       appBar: AppBar(
         title: const Text('Manage Products & Categories'),
         backgroundColor: Colors.black,

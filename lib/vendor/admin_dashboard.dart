@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:neskart/createProducts.dart';
-import 'package:neskart/home_page.dart';
 import 'package:neskart/vendor/manage_customer_screen.dart';
 import 'package:neskart/vendor/manage_items.dart';
 import 'package:neskart/vendor/order_detail_screen.dart';
@@ -19,11 +18,30 @@ class _AdminDashboardState extends State<AdminDashboard> {
   int orderCount = 0;
   int todayTotal = 0;
   int revenueTotal = 0;
+  int cancelledCount = 0;
+
 
   @override
   void initState() {
     super.initState();
     fetchDashboardData();
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'delivered':
+        return Colors.green;
+      case 'pending':
+        return Colors.orange;
+      case 'cancelled':
+        return Colors.red;
+      case 'processing':
+        return Colors.blue;
+      case 'shipped':
+        return Colors.teal;
+      default:
+        return Colors.grey;
+    }
   }
 
   Future<void> fetchDashboardData() async {
@@ -36,12 +54,19 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
     for (var doc in ordersSnapshot.docs) {
       final data = doc.data();
-      orders++;
+
+      final status = data['status']?.toString().toLowerCase() ?? 'pending';
+
+      if (status == 'cancelled') {
+        cancelledCount++;
+        continue;
+      }
+
+      orders++; // non-cancelled only
 
       final amount = data['subtotal'] as num? ?? 0;
       totalRevenue += amount.toInt();
 
-      // Use the correct field
       final Timestamp? timestamp = data['orderDate'];
       if (timestamp == null) continue;
 
@@ -53,10 +78,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
       }
     }
 
+
     setState(() {
       orderCount = orders;
       todayTotal = todayOrderCount;
       revenueTotal = totalRevenue;
+      cancelledCount = cancelledCount;
     });
   }
 
@@ -64,6 +91,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFe8dfd4),
       appBar: AppBar(
         title: const Text(
           'Nescart Admin Dashboard',
@@ -93,6 +121,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 _DashboardCard(title: 'Total Orders', value: '$orderCount'),
                 _DashboardCard(title: "Today's Orders", value: '$todayTotal'),
                 _DashboardCard(title: 'Total Revenue', value: 'Rs $revenueTotal'),
+                _DashboardCard(title: 'Cancelled Orders', value: '$cancelledCount'),
+
               ],
             ),
             const SizedBox(height: 32),
@@ -166,9 +196,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                             trailing: Text(
                               status,
                               style: TextStyle(
-                                color: status == 'Delivered'
-                                    ? Colors.green
-                                    : Colors.orange,
+                                color: _getStatusColor(status),
                                 fontWeight: FontWeight.bold,
                               ),
                             ),

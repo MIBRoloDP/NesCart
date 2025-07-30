@@ -61,8 +61,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
           final bool isAdmin = data['admin'] == true;
           final String isBlocked = data['status'] ?? 'Active';
+<<<<<<< HEAD
           
        isBlocked=="Active"?
+=======
+
+
+          isBlocked=="Active"?
+>>>>>>> 40c99d1b7141ec82244bab2eed9c993f21a3b816
        Navigator.push(
          context,
          MaterialPageRoute(

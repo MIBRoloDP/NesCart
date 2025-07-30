@@ -21,6 +21,7 @@ class _ManageCustomersScreenState extends State<ManageCustomersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFe8dfd4),
       appBar: AppBar(
         title: const Text('Manage Customers'),
         backgroundColor: Colors.black,

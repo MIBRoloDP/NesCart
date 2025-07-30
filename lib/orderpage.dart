@@ -13,7 +13,7 @@ class OrderPage extends StatefulWidget {
 
 class _OrderPageState extends State<OrderPage> {
   int selectedIndex = 0;
-  final tabs = ['Ongoing', 'Completed', 'Canceled'];
+  final tabs = ['Ongoing', 'Order Placed', 'Canceled'];
 FirebaseAuth _auth = FirebaseAuth.instance;
   Stream<QuerySnapshot> getUserCart(String uid) {
     return FirebaseFirestore.instance.collection('users').doc(uid).collection('cart').snapshots();
