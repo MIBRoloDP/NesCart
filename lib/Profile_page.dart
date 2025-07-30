@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'orderpage.dart';
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -70,12 +72,17 @@ class _ProfilePageState extends State<ProfilePage> {
                   Text('To Pay', style: TextStyle(fontSize: 12)),
                 ],
               ),
-              Column(
-                children: const [
-                  Icon(Icons.local_shipping, color: Colors.orange),
-                  SizedBox(height: 4),
-                  Text('To Ship', style: TextStyle(fontSize: 12)),
-                ],
+              GestureDetector(
+                onTap: (){
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>OrderPage()));
+                },
+                child: Column(
+                  children: const [
+                    Icon(Icons.local_shipping, color: Colors.orange),
+                    SizedBox(height: 4),
+                    Text('To Ship', style: TextStyle(fontSize: 12)),
+                  ],
+                ),
               ),
               Column(
                 children: const [

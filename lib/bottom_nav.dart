@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:neskart/Profile_page.dart';
+import 'package:neskart/cart.dart';
 import 'package:neskart/messages.dart';
 import 'package:neskart/Profile_page.dart';
 import 'home_page.dart'; // Make sure this path is correct
@@ -19,15 +20,29 @@ class _bottomnavState extends State<bottomnav> {
   final List<Widget> _pages = [
     homepage(),
     MessageScreen(),
-   ProfilePage()
+    cart(),
+   ProfilePage(),
   ];
 
   final List<IconData> _icons = [
     Icons.home,
     Icons.message_sharp,
-    Icons.person
+    Icons.shopping_cart,
+    Icons.person,
   ];
 
+  // Padding(
+  // padding: const EdgeInsets.only(right: 10),
+  // child: IconButton(
+  // onPressed: () {
+  // Navigator.push(
+  // context,
+  // MaterialPageRoute(builder: (context) => cart()),
+  // );
+  // },
+  // icon: const Icon(Icons.shopping_cart, color: Colors.white, size: 30),
+  // ),
+  // ),
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -275,6 +275,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
       print('Email sent successfully!');
 
       await saveOrderToFirestore();
+      saveOrderToFirestoreGlobal();
 
 
       await generateAndDownloadPDF();
@@ -293,6 +294,82 @@ class _CheckoutPageState extends State<CheckoutPage> {
         await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid).collection("orders").doc(orderId)
+            .set({
+          'userId': user.uid,
+          'orderDate': FieldValue.serverTimestamp(),
+          'orderId': orderId,
+          'items': widget.selectedItems,
+          'total': widget.price + 150,
+          'shipping': 50.0,
+          'tax': 100.0,
+          'subtotal': widget.price,
+          'paymentMethod': selectedPaymentMethod?.name ?? 'unknown',
+          'status': 'completed',
+          'deliveryAddress':{
+            'lat':latitude,
+            'lng':longitude,
+          },
+          'officeAddress':{
+            'lat':27.7000,
+            'lng':85.3117,
+          },
+          'currentAddress':{
+            'lat':27.7000,
+            'lng':85.3117,
+          }
+
+        });
+        for (int i = 0; i < widget.selectedItems.length; i++) {
+          String itemId = widget.selectedItems[i]['id'];
+          FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection('cart')
+              .doc(itemId)
+              .update({'isCheckout': true,
+            'orderDetails':{
+              'userId': user.uid,
+              'orderDate': FieldValue.serverTimestamp(),
+              'orderId': orderId,
+              'items': widget.selectedItems,
+              'total': widget.price + 150,
+              'shipping': 50.0,
+              'tax': 100.0,
+              'subtotal': widget.price,
+              'paymentMethod': selectedPaymentMethod?.name ?? 'unknown',
+              'status': 'completed',
+              'deliveryAddress':{
+                'lat':latitude,
+                'lng':longitude,
+              },
+              'officeAddress':{
+                'lat':27.7000,
+                'lng':85.3117,
+              },
+              'currentAddress':{
+                'lat':27.7000,
+                'lng':85.3117,
+              }
+
+            }
+          });
+
+          // await updateCart(itemId);
+        }
+
+      } catch (e) {
+        print('Error saving order to Firestore: $e');
+      }
+    }
+  }
+  Future<void> saveOrderToFirestoreGlobal() async {
+    final user = FirebaseAuth.instance.currentUser;
+    log(user!.uid.toString());
+    if (user != null) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('orders')
+            .doc(orderId)
             .set({
           'userId': user.uid,
           'orderDate': FieldValue.serverTimestamp(),
@@ -417,6 +494,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
       if (selectedPaymentMethod == PaymentMethod.cod) {
         // await sendOrderEmail(widget.selectedItems);
         await saveOrderToFirestore();
+        await saveOrderToFirestoreGlobal();
 
         await generateAndDownloadPDF();
 
@@ -465,6 +543,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
           try {
             // await sendOrderEmail(widget.selectedItems);
             await saveOrderToFirestore();
+           await  saveOrderToFirestoreGlobal();
 
             await generateAndDownloadPDF();
 

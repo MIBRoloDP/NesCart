@@ -1,95 +1,79 @@
+import 'dart:convert';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-class orders extends StatefulWidget {
-  const orders({super.key});
+import 'package:neskart/track_order.dart';
+class OrderPage extends StatefulWidget {
+  const OrderPage({super.key});
 
   @override
-  State<orders> createState() => _ordersState();
+  State<OrderPage> createState() => _OrderPageState();
 }
 
-class _ordersState extends State<orders> {
+class _OrderPageState extends State<OrderPage> {
   int selectedIndex = 0;
   final tabs = ['Ongoing', 'Completed', 'Canceled'];
-
-
+FirebaseAuth _auth = FirebaseAuth.instance;
+  Stream<QuerySnapshot> getUserCart(String uid) {
+    return FirebaseFirestore.instance.collection('users').doc(uid).collection('cart').snapshots();
+  }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body:  Column(
-      children: [
-        SizedBox(height: 20),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Container(
-            height: 44,
-            decoration: BoxDecoration(
-              color: Color(0xFFF1F1F1),
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Row(
-              children: List.generate(tabs.length, (index) {
-                bool isSelected = selectedIndex == index;
-                return Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedIndex = index;
-                      });
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: isSelected ? Colors.white : Colors.transparent,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      alignment: Alignment.center,
-                      child: index == 1
-                          ? Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            tabs[index],
-                            style: TextStyle(
-                              color: isSelected
-                                  ? Colors.black
-                                  : Colors.grey,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(width: 4),
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                          )
-                        ],
-                      )
-                          : Text(
-                        tabs[index],
-                        style: TextStyle(
-                          color: isSelected
-                              ? Colors.black
-                              : Colors.grey,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+
+    return Scaffold(body: StreamBuilder(
+      stream: getUserCart(_auth.currentUser!.uid),
+      builder: (context, cartSnapshot) {
+        if (!cartSnapshot.hasData) return const CircularProgressIndicator();
+
+        final cartItems = cartSnapshot.data!.docs
+            .where((doc) => (doc.data() as Map)['isCheckout'])
+            .toList();
+
+        if (cartItems.isEmpty) {
+          return const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text("No items in cart."),
+          );
+        }
+
+        return ListView.builder(
+          itemCount: cartItems.length,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemBuilder: (context, index) {
+            final item = cartItems[index];
+            final itemData = item.data() as Map<String, dynamic>;
+
+            return GestureDetector(
+              onTap: (){
+                itemData['isCheckout']?Navigator.push(context, MaterialPageRoute(builder: (context)=>OrderTrackingMap(
+                  orderId: itemData['orderDetails']['orderId'],
+                ))):"";
+              },
+              child: Card(
+                margin: const EdgeInsets.symmetric(vertical: 6),
+                child: ListTile(
+                  leading: Image.memory(base64Decode(itemData['image']), width: 50, height: 50),
+                  title: Text(itemData['name']),
+                  subtitle: Text("Qty: ${itemData['qty']} • Rs.${itemData['price']}"),
+                  trailing: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(itemData['isCheckout'] ? "Checked Out" : "In Cart",
+                          style: TextStyle(color: itemData['isCheckout'] ? Colors.blue : Colors.black)),
+                      Text(itemData['isDelivered'] ? "Delivered" : "Pending",
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: itemData['isDelivered'] ? Colors.green : Colors.red)),
+                    ],
                   ),
-                );
-              }),
-            ),
-          ),
-        ),
-        SizedBox(height: 40),
-        // Content based on selected tab
-        if (selectedIndex == 0)
-          Text('', style: TextStyle(fontSize: 18))
-        else if (selectedIndex == 1)
-          Text('', style: TextStyle(fontSize: 18))
-        else
-          Text('', style: TextStyle(fontSize: 18)),
-      ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     ),
 
     );

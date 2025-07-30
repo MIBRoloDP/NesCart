@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:neskart/cart.dart';
@@ -6,6 +7,7 @@ import 'package:neskart/Profile_page.dart';
 import 'package:neskart/login_page.dart';
 import 'package:neskart/product_detail.dart' show ProductDetailPage;
 import 'package:neskart/splash_screen.dart';
+import 'package:neskart/wishlist.dart';
 import 'createProducts.dart';
 import 'newz_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -35,6 +37,17 @@ class _homepageState extends State<homepage> {
   List<Map<String, dynamic>> firebaseFlashCategories = [];
   List<Map<String, dynamic>> firebaseBestSellers = [];
   List<Map<String, dynamic>> firebaseTabCategories = [];
+  List<Map<String, dynamic>> wishlist = [];
+  bool isInWishlist(Map<String, dynamic> product) {
+    return wishlist.any((item) => item['id'] == product['id']);
+  }
+
+  void removeFromWishlist(Map<String, dynamic> product) {
+    setState(() {
+      wishlist.removeWhere((item) => item['id'] == product['id']);
+    });
+  }
+
 
   Future<void> _refreshData() async {
     setState(() {
@@ -284,8 +297,7 @@ class _homepageState extends State<homepage> {
     });
   }
 
-  int _selectedIndex = 0;
-  final List<IconData> _icons = [Icons.home, Icons.message, Icons.person];
+
 
   int _selected = 0;
 
@@ -334,6 +346,7 @@ class _homepageState extends State<homepage> {
       const SnackBar(content: Text('Added to cart!')),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -386,18 +399,7 @@ class _homepageState extends State<homepage> {
           ),
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => cart()),
-                );
-              },
-              icon: const Icon(Icons.shopping_cart, color: Colors.white, size: 30),
-            ),
-          ),
+
           Padding(
             padding: const EdgeInsets.only(right: 10),
             child: IconButton(
@@ -460,9 +462,14 @@ class _homepageState extends State<homepage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.video_call),
-              title: const Text("Video"),
-              onTap: () {},
+              leading: const Icon(Icons.list_alt_outlined),
+              title: const Text("My Wishlist"),
+              onTap: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) => WishlistPage(wishlist: wishlist)));
+
+
+              },
             ),
             ListTile(
               leading: const Icon(Icons.settings),
@@ -472,7 +479,10 @@ class _homepageState extends State<homepage> {
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text("Logout"),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) =>LoginScreen()));
+              },
             ),
           ],
         ),
@@ -682,6 +692,38 @@ class _homepageState extends State<homepage> {
                             ),
                             const SizedBox(height: 16),
                             // Firebase Categories
+                            // SizedBox(
+                            //   height: 100,
+                            //   child: ListView.builder(
+                            //     scrollDirection: Axis.horizontal,
+                            //     itemCount: firebaseCategories.length,
+                            //     itemBuilder: (context, index) {
+                            //       final item = firebaseCategories[index];
+                            //       return Padding(
+                            //         padding: const EdgeInsets.only(right: 16.0),
+                            //         child: Column(
+                            //           children: [
+                            //             Container(
+                            //               width: 60,
+                            //               height: 60,
+                            //               decoration: const BoxDecoration(
+                            //                 color: Color(0xFFe8dfd4),
+                            //                 shape: BoxShape.circle,
+                            //               ),
+                            //               child: Icon(
+                            //                 _getIconFromString(item['icon']),
+                            //                 size: 30,
+                            //                 color: Colors.black,
+                            //               ),
+                            //             ),
+                            //             const SizedBox(height: 8),
+                            //             Text(item['label'] as String),
+                            //           ],
+                            //         ),
+                            //       );
+                            //     },
+                            //   ),
+                            // ),
                             SizedBox(
                               height: 100,
                               child: ListView.builder(
@@ -691,29 +733,70 @@ class _homepageState extends State<homepage> {
                                   final item = firebaseCategories[index];
                                   return Padding(
                                     padding: const EdgeInsets.only(right: 16.0),
-                                    child: Column(
-                                      children: [
-                                        Container(
-                                          width: 60,
-                                          height: 60,
-                                          decoration: const BoxDecoration(
-                                            color: Color(0xFFe8dfd4),
-                                            shape: BoxShape.circle,
+                                    child: InkWell(
+                                      onTap: () {
+
+                                        switch (item['name']) {
+                                          case 'Food':
+                                            Navigator.push(context, MaterialPageRoute(
+                                              builder: (context) => cart(),
+                                            ));
+                                            break; case 'Audio':
+                                            Navigator.push(context, MaterialPageRoute(
+                                              builder: (context) => cart(),
+                                            ));
+                                            break; case 'Furniture':
+                                            Navigator.push(context, MaterialPageRoute(
+                                              builder: (context) => cart(),
+                                            ));
+                                            break;
+                                          case 'Device':
+                                            Navigator.push(context, MaterialPageRoute(
+                                              builder: (context) => cart(),
+                                            ));
+                                            break;
+                                          case 'Discount':
+                                            Navigator.push(context, MaterialPageRoute(
+                                              builder: (context) => LoginScreen(),
+                                            )); case 'Gaming':
+                                            Navigator.push(context, MaterialPageRoute(
+                                              builder: (context) => LoginScreen(),
+                                            )); case 'Bike':
+                                            Navigator.push(context, MaterialPageRoute(
+                                              builder: (context) => LoginScreen(),
+                                            ));
+                                            break;
+                                          default:
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text('No page for ${item['label']}')),
+                                            );
+                                        }
+                                      },
+                                      child: Column(
+                                        children: [
+                                          Container(
+                                            width: 60,
+                                            height: 60,
+                                            decoration: const BoxDecoration(
+                                              color: Color(0xFFe8dfd4),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(
+                                              _getIconFromString(item['icon']),
+                                              size: 30,
+                                              color: Colors.black,
+                                            ),
                                           ),
-                                          child: Icon(
-                                            _getIconFromString(item['icon']),
-                                            size: 30,
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Text(item['label'] as String),
-                                      ],
+                                          const SizedBox(height: 8),
+                                          Text(item['label'] as String),
+                                        ],
+                                      ),
                                     ),
                                   );
                                 },
                               ),
                             ),
+
                           ],
                         ),
                       ),
@@ -871,10 +954,29 @@ class _homepageState extends State<homepage> {
                                             top: 8,
                                             right: 8,
                                             child: GestureDetector(
-                                              onTap: () {},
-                                              child: const Icon(
-                                                Icons.favorite_border,
-                                                color: Colors.white,
+                                              onTap: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => WishlistPage(wishlist: wishlist),
+                                                  ),
+                                                );
+                                              },
+                                              child:  IconButton(
+                                                icon: Icon(
+                                                  isInWishlist(product) ? Icons.favorite : Icons.favorite_border,
+                                                  size: 20,
+                                                  color: isInWishlist(product) ? Colors.red : Colors.black,
+                                                ),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    if (isInWishlist(product)) {
+                                                      wishlist.removeWhere((item) => item['id'] == product['id']);
+                                                    } else {
+                                                      wishlist.add(product);
+                                                    }
+                                                  });
+                                                },
                                               ),
                                             ),
                                           ),
@@ -908,13 +1010,15 @@ class _homepageState extends State<homepage> {
                                             Text(
                                               product["oldPrice"]!.toString(),
                                               style: const TextStyle(
-                                                decoration: TextDecoration.lineThrough,
                                                 fontSize: 12,
+                                                color: Colors.grey,
+                                                decoration: TextDecoration.lineThrough,
                                               ),
                                             ),
                                             Text(
                                               product["price"]!.toString(),
                                               style: const TextStyle(color: Colors.green),
+
                                             ),
                                           ],
                                         ),
@@ -1021,32 +1125,41 @@ class _homepageState extends State<homepage> {
                         ),
                         itemBuilder: (context, index) {
                           final product = currentProducts[index];
-                          return Card(
-                            margin: EdgeInsets.zero,
-                            elevation: 2,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            color: const Color(0xFFe8dfd4),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Stack(
-                                    children: [
-                                      Expanded(
-                                        child: ClipRRect(
+
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ProductDetailPage(product: product),
+                                ),
+                              );
+                            },
+                            child: Card(
+                              margin: EdgeInsets.zero,
+                              elevation: 2,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              color: const Color(0xFFe8dfd4),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Stack(
+                                      children: [
+                                        ClipRRect(
                                           borderRadius: BorderRadius.circular(8.0),
-                                          child:
-                                               Image.memory(
+                                          child: Image.memory(
                                             base64Decode(product['image']),
                                             width: double.infinity,
-                                            height: 200,
+                                            height: 160,
                                             fit: BoxFit.cover,
                                             errorBuilder: (context, error, stackTrace) {
                                               return Container(
                                                 width: double.infinity,
+                                                height: 160,
                                                 color: Colors.grey[200],
                                                 child: Icon(
                                                   Icons.broken_image,
@@ -1054,66 +1167,69 @@ class _homepageState extends State<homepage> {
                                                 ),
                                               );
                                             },
-                                          )
-
+                                          ),
                                         ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(left: 115, bottom: 20),
-                                        child: Align(
+                                        Positioned(
+                                          right: 0,
+                                          top: 0,
                                           child: IconButton(
                                             icon: Icon(
-                                              product['isFavorite']
+                                              isInWishlist(product)
                                                   ? Icons.favorite
                                                   : Icons.favorite_border,
                                               size: 20,
-                                              color: product['isFavorite']
+                                              color: isInWishlist(product)
                                                   ? Colors.red
                                                   : Colors.black,
                                             ),
                                             onPressed: () {
                                               setState(() {
-                                                product['isFavorite'] = !product['isFavorite'];
+                                                if (isInWishlist(product)) {
+                                                  wishlist.removeWhere(
+                                                          (item) => item['id'] == product['id']);
+                                                } else {
+                                                  wishlist.add(product);
+                                                }
                                               });
                                             },
                                           ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    product['name'],
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
+                                      ],
                                     ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        product['currentPrice'].toString(),
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black,
-                                        ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      product['name'] ?? "Unnamed",
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                      Text(
-                                        product['oldPrice'].toString(),
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey,
-                                          decoration: TextDecoration.lineThrough,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          "Rs ${product['currentPrice'] ?? '0'}",
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black,
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                        Text(
+                                          "Rs ${product['oldPrice'] ?? '0'}",
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey,
+                                            decoration: TextDecoration.lineThrough,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           );
@@ -1121,9 +1237,10 @@ class _homepageState extends State<homepage> {
                       );
                     },
                   ),
+
                   // Firebase Products Stream
                   Container(
-                    height: 300,
+                    height: 900,
                     width: 400,
                     child: StreamBuilder<QuerySnapshot>(
                       stream: FirebaseFirestore.instance.collection('products').snapshots(),
@@ -1142,6 +1259,8 @@ class _homepageState extends State<homepage> {
                         }
 
                         return GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
                           padding: const EdgeInsets.all(16),
                           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
@@ -1153,103 +1272,123 @@ class _homepageState extends State<homepage> {
                           itemBuilder: (context, index) {
                             final data = docs[index].data() as Map<String, dynamic>;
 
-                            return Card(
-                              margin: EdgeInsets.zero,
-                              elevation: 2,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              color: const Color(0xFFe8dfd4),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Stack(
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(8.0),
-                                          child: Container(
-                                            height: 100,
-                                            width: double.infinity,
-                                            color: Colors.grey[200],
-                                            child: Builder(
-                                              builder: (context) {
-                                                try {
-                                                  if (data['image'] != null && data['image'] != "") {
-                                                    return Image.memory(
-                                                      base64Decode(data['image']),
-                                                      fit: BoxFit.cover,
-                                                      width: double.infinity,
-                                                      height: double.infinity,
-                                                    );
-                                                  } else {
-                                                    return const Icon(Icons.image, size: 80);
-                                                  }
-                                                } catch (e) {
-                                                  return const Icon(Icons.broken_image, size: 80);
-                                                }
-                                              },
-                                            ),
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.only(left: 115, bottom: 20),
-                                          child: Align(
-                                            alignment: Alignment.topRight,
-                                            child: IconButton(
-                                              icon: Icon(
-                                                isFavoriteList[index]
-                                                    ? Icons.favorite
-                                                    : Icons.favorite_border,
-                                                size: 20,
-                                                color: isFavoriteList[index]
-                                                    ? Colors.red
-                                                    : Colors.black,
+                            return GestureDetector(
+                              onTap: (){
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ProductDetailPage(product: data),
+                                  ),
+                                );
+                              },
+                              child: Card(
+                                margin: EdgeInsets.zero,
+                                elevation: 2,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                color: const Color(0xFFe8dfd4),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Stack(
+                                        children: [
+                                          Expanded(
+                                            child: ClipRRect(
+                                              borderRadius: BorderRadius.circular(8.0),
+                                              child: Container(
+                                                width: double.infinity,
+                                                color: Colors.grey[200],
+                                                child: Builder(
+                                                  builder: (context)
+                                                  {
+                                                    try {
+                                                      if (data['image'] != null && data['image'] != "") {
+                                                        return Image.memory(
+                                                          base64Decode(data['image']),
+                                                          fit: BoxFit.cover,
+                                                          width: double.infinity,
+                                                          height:160,
+                                                        );
+                                                      } else {
+                                                        return const Icon(Icons.image, size: 80);
+                                                      }
+                                                    } catch (e) {
+                                                      return const Icon(Icons.broken_image, size: 80);
+                                                    }
+                                                  },
+                                                ),
                                               ),
-                                              onPressed: () {
-                                                setState(() {
-                                                  isFavoriteList[index] = !isFavoriteList[index];
-                                                });
-                                              },
                                             ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      data['name'] ?? "No Name",
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
+                                          Padding(
+                                            padding: const EdgeInsets.only(left: 115, bottom: 20),
+                                            child: Align(
+                                              alignment: Alignment.topRight,
+                                              child: IconButton(
+                                                icon: Icon(
+                                                  isFavoriteList[index] ? Icons.favorite : Icons.favorite_border,
+                                                  size: 20,
+                                                  color: isFavoriteList[index] ? Colors.red : Colors.black,
+                                                ),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    isFavoriteList[index] = !isFavoriteList[index];
+
+                                                    final currentProduct = docs[index].data() as Map<String, dynamic>;
+
+                                                    if (isFavoriteList[index]) {
+                                                      // Add to wishlist if not already added
+                                                      if (!wishlist.any((item) => item['id'] == currentProduct['id'])) {
+                                                        wishlist.add(currentProduct);
+                                                      }
+                                                    } else {
+                                                      // Remove from wishlist
+                                                      wishlist.removeWhere((item) => item['id'] == currentProduct['id']);
+                                                    }
+                                                  });
+                                                },
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          "Rs ${data['price'] ?? '0'}",
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black,
-                                          ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        data['name'] ?? "No Name",
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
                                         ),
-                                        const Text(
-                                          "Rs 00",
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey,
-                                            decoration: TextDecoration.lineThrough,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            "Rs ${data['price'] ?? '0'}",
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black,
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                          const Text(
+                                            "Rs 00",
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey,
+                                              decoration: TextDecoration.lineThrough,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             );

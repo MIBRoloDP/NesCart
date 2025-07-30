@@ -111,6 +111,7 @@ class _CartPageState extends State<cart> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text("My Cart"),
         actions: [
           IconButton(
@@ -222,20 +223,27 @@ class _CartPageState extends State<cart> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    ElevatedButton(
-                      onPressed: items.isEmpty
-                          ? null
-                          : () => proceedToCheckout(items, totalPrice),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 100),
+                      child: ElevatedButton(
+
+                        onPressed: items.isEmpty
+                            ? null
+                            : () => proceedToCheckout(items, totalPrice),
+                        style: ElevatedButton.styleFrom(
+
+                          padding: const EdgeInsets.all(20),
+                          backgroundColor: Color(0xFFe8dfd4),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+
+                          ),
+
                         ),
-                      ),
-                      child: const Text(
-                        "Checkout",
-                        style: TextStyle(fontSize: 18, color: Colors.white),
+                        child: const Text(
+                          "Checkout",
+                          style: TextStyle(fontSize: 18, color: Colors.black),
+                        ),
                       ),
                     ),
                   ],

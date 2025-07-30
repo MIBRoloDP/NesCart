@@ -42,6 +42,7 @@ class _SignupScreenState extends State<SignupScreen> {
               'email': user.email,
               'name': name,
               'role': user,
+              'status':"Active"
 
             });
 
