@@ -60,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
           log("Email from Firestore: ${data['email']}");
 
           final bool isAdmin = data['admin'] == true;
-          final String isBlocked = data['status'];
+          final String isBlocked = data['status'] ?? 'Active';
           
        isBlocked=="Active"?
        Navigator.push(

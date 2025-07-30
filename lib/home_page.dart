@@ -368,10 +368,16 @@ class _homepageState extends State<homepage> {
               Navigator.push(context, MaterialPageRoute(builder: (context)=>Searchpage()));
             },
             child: Card(
-              color: Colors.white,
+              color: Color(0xFFe8dfd4),
               child: Padding(
-                padding: const EdgeInsets.only(top:12.0,left: 10),
-                child: Text("Enter to Search"),
+                padding: const EdgeInsets.only(top:12,left: 10),
+                child: Text("Enter to Search",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+
+                ),
+                ),
               ),
 
             ),
@@ -470,14 +476,6 @@ class _homepageState extends State<homepage> {
               onTap: () => Navigator.pop(context),
             ),
             ListTile(
-              leading: const Icon(Icons.shopping_cart),
-              title: const Text("Cart"),
-              onTap: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => cart()));
-              },
-            ),
-            ListTile(
 
               leading: const Icon(Icons.list_alt_outlined),
               title: const Text("My Wishlist"),
@@ -488,17 +486,6 @@ class _homepageState extends State<homepage> {
 
               },
 
-            ),
-            ListTile(
-              leading: const Icon(Icons.video_call),
-              title: const Text("Video"),
-              onTap: () {},
-
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text("Analytics"),
-              onTap: () => Navigator.pop(context),
             ),
             ListTile(
               leading: const Icon(Icons.logout),

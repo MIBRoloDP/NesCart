@@ -48,7 +48,7 @@ class _SearchpageState extends State<Searchpage> {
         toolbarHeight: 85,
         title:
         Padding(
-          padding: const EdgeInsets.all(0.0),
+          padding: const EdgeInsets.only(right: 40,top: 10,bottom: 10),
           child: TextFormField(
             onChanged: (value){
              setState(() {
@@ -62,13 +62,12 @@ class _SearchpageState extends State<Searchpage> {
             controller: SearchController,
             focusNode: SearchFocusNode,
             decoration: InputDecoration(
-              hintText: 'Search',
+              hintText: 'Enter to Search',
               hintStyle: const TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),
-              prefixIcon: const Icon(Icons.search, color: Colors.black),
               suffixIcon: (isFocused)
                   ? IconButton(
                 icon: const Icon(Icons.clear, color: Colors.black),
@@ -102,159 +101,162 @@ class _SearchpageState extends State<Searchpage> {
         iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: Colors.black,
       ),
-      body:  StreamBuilder<QuerySnapshot>(
-        stream: _searchStream(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Center(child: Text('Something went wrong'));
-          }
+      body:  SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: StreamBuilder<QuerySnapshot>(
+          stream: _searchStream(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return const Center(child: Text('Something went wrong'));
+            }
 
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          final docs = snapshot.data!.docs;
-          if (isFavoriteList.length != docs.length) {
-            isFavoriteList = List.generate(docs.length, (_) => false);
-          }
+            final docs = snapshot.data!.docs;
+            if (isFavoriteList.length != docs.length) {
+              isFavoriteList = List.generate(docs.length, (_) => false);
+            }
 
-          return GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: 0.7,
-            ),
-            itemCount: docs.length,
-            itemBuilder: (context, index) {
-              final data = docs[index].data() as Map<String, dynamic>;
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: 0.7,
+              ),
+              itemCount: docs.length,
+              itemBuilder: (context, index) {
+                final data = docs[index].data() as Map<String, dynamic>;
 
-              return GestureDetector(
-                onTap: (){
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ProductDetailPage(product: data),
+                return GestureDetector(
+                  onTap: (){
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProductDetailPage(product: data),
+                      ),
+                    );
+                  },
+                  child: Card(
+                    margin: EdgeInsets.zero,
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                  );
-                },
-                child: Card(
-                  margin: EdgeInsets.zero,
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  color: const Color(0xFFe8dfd4),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Stack(
-                          children: [
-                            Expanded(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: Container(
-                                  width: double.infinity,
-                                  color: Colors.grey[200],
-                                  child: Builder(
-                                    builder: (context)
-                                    {
-                                      try {
-                                        if (data['image'] != null && data['image'] != "") {
-                                          return Image.memory(
-                                            base64Decode(data['image']),
-                                            fit: BoxFit.cover,
-                                            width: double.infinity,
-                                            height:160,
-                                          );
-                                        } else {
-                                          return const Icon(Icons.image, size: 80);
+                    color: const Color(0xFFe8dfd4),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Stack(
+                            children: [
+                              Expanded(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  child: Container(
+                                    width: double.infinity,
+                                    color: Colors.grey[200],
+                                    child: Builder(
+                                      builder: (context)
+                                      {
+                                        try {
+                                          if (data['image'] != null && data['image'] != "") {
+                                            return Image.memory(
+                                              base64Decode(data['image']),
+                                              fit: BoxFit.cover,
+                                              width: double.infinity,
+                                              height:160,
+                                            );
+                                          } else {
+                                            return const Icon(Icons.image, size: 80);
+                                          }
+                                        } catch (e) {
+                                          return const Icon(Icons.broken_image, size: 80);
                                         }
-                                      } catch (e) {
-                                        return const Icon(Icons.broken_image, size: 80);
-                                      }
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 115, bottom: 20),
+                                child: Align(
+                                  alignment: Alignment.topRight,
+                                  child: IconButton(
+                                    icon: Icon(
+                                      isFavoriteList[index] ? Icons.favorite : Icons.favorite_border,
+                                      size: 20,
+                                      color: isFavoriteList[index] ? Colors.red : Colors.black,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        isFavoriteList[index] = !isFavoriteList[index];
+
+                                        final currentProduct = docs[index].data() as Map<String, dynamic>;
+
+                                        if (isFavoriteList[index]) {
+                                          // Add to wishlist if not already added
+                                          if (!wishlist.any((item) => item['id'] == currentProduct['id'])) {
+                                            wishlist.add(currentProduct);
+                                          }
+                                        } else {
+                                          // Remove from wishlist
+                                          wishlist.removeWhere((item) => item['id'] == currentProduct['id']);
+                                        }
+                                      });
                                     },
                                   ),
                                 ),
                               ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            data['name'] ?? "No Name",
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
                             ),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 115, bottom: 20),
-                              child: Align(
-                                alignment: Alignment.topRight,
-                                child: IconButton(
-                                  icon: Icon(
-                                    isFavoriteList[index] ? Icons.favorite : Icons.favorite_border,
-                                    size: 20,
-                                    color: isFavoriteList[index] ? Colors.red : Colors.black,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      isFavoriteList[index] = !isFavoriteList[index];
-
-                                      final currentProduct = docs[index].data() as Map<String, dynamic>;
-
-                                      if (isFavoriteList[index]) {
-                                        // Add to wishlist if not already added
-                                        if (!wishlist.any((item) => item['id'] == currentProduct['id'])) {
-                                          wishlist.add(currentProduct);
-                                        }
-                                      } else {
-                                        // Remove from wishlist
-                                        wishlist.removeWhere((item) => item['id'] == currentProduct['id']);
-                                      }
-                                    });
-                                  },
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Rs ${data['price'] ?? '0'}",
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          data['name'] ?? "No Name",
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
+                              const Text(
+                                "Rs 00",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                  decoration: TextDecoration.lineThrough,
+                                ),
+                              ),
+                            ],
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Rs ${data['price'] ?? '0'}",
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                            ),
-                            const Text(
-                              "Rs 00",
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                                decoration: TextDecoration.lineThrough,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              );
-            },
-          );
-        },
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
