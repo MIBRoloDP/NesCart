@@ -49,14 +49,11 @@ class _homepageState extends State<homepage> {
   bool isInWishlist(Map<String, dynamic> product) {
     return wishlist.any((item) => item['id'] == product['id']);
   }
-
   void removeFromWishlist(Map<String, dynamic> product) {
     setState(() {
       wishlist.removeWhere((item) => item['id'] == product['id']);
     });
   }
-
-
   Future<void> _refreshData() async {
     setState(() {
       _isLoading = true;
@@ -65,8 +62,7 @@ class _homepageState extends State<homepage> {
     await _loadFirebaseData();
     setState(() {
       _items = List.generate(
-        10,
-            (index) => 'Refreshed Item ${index + 1} - ${DateTime.now().second}',
+        10,(index) => 'Refreshed Item ${index + 1} - ${DateTime.now().second}',
       );
       _isLoading = false;
     });
@@ -74,11 +70,8 @@ class _homepageState extends State<homepage> {
       const SnackBar(content: Text('Data Refreshed!')),
     );
   }
-
-
   Future<void> _loadFirebaseData() async {
     try {
-
       final categoriesSnapshot = await _firestore.collection('categories').get();
       firebaseCategories = categoriesSnapshot.docs.map((doc) {
         final data = doc.data();
@@ -101,8 +94,6 @@ class _homepageState extends State<homepage> {
           ...data,
         };
       }).toList();
-
-
       final bestSellersSnapshot = await _firestore
           .collection('products')
           .where('isBestSeller', isEqualTo: true)
@@ -123,16 +114,12 @@ class _homepageState extends State<homepage> {
 
       final tabCategoriesSnapshot = await _firestore.collection('tab_categories').get();
       firebaseTabCategories = [];
-
       for (var doc in tabCategoriesSnapshot.docs) {
         final data = doc.data();
-
-
         final productsSnapshot = await _firestore
             .collection('products')
             .where('categoryId', isEqualTo: doc.id)
             .get();
-
         final products = productsSnapshot.docs.map((productDoc) {
           final productData = productDoc.data();
           return {
@@ -145,7 +132,6 @@ class _homepageState extends State<homepage> {
             ...productData,
           };
         }).toList();
-
         firebaseTabCategories.add({
           'id': doc.id,
           'label': data['name'] ?? 'Category',
@@ -155,14 +141,11 @@ class _homepageState extends State<homepage> {
           ...data,
         });
       }
-
       setState(() {});
     } catch (e) {
       // print('Error loading Firebase data: $e');
     }
   }
-
-
   IconData _getIconFromString(String iconName) {
     switch (iconName.toLowerCase()) {
       case 'phone_android':
@@ -197,7 +180,6 @@ class _homepageState extends State<homepage> {
         return Icons.category;
     }
   }
-
   Widget _buildCategoryWidget(String title, String description) {
     final colors = [
       Colors.blue[50]!,
@@ -238,10 +220,7 @@ class _homepageState extends State<homepage> {
       ),
     );
   }
-
   int _currentPage = 0;
-
-
   final List<NewsArticle> newsArticles = [
     NewsArticle(
       imageUrl: 'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Zm9vZHxlbnwwfHwwfHx8MA%3D%3D',
@@ -270,9 +249,9 @@ class _homepageState extends State<homepage> {
     NewsArticle(
       imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxbU3zq3s8f3PSHRNQubNowRwh5YO9aes8eA&',
       category: 'World',
-      dev: 'BBC News',
+      dev: 'News',
       timeAgo: '2 hours ago',
-      headline: 'Global leaders meet for climate summit',
+      headline: 'For Haul',
       isVerified: false,
     ),
   ];
@@ -304,17 +283,13 @@ class _homepageState extends State<homepage> {
           .toList();
     });
   }
-
-
-
   int _selected = 0;
-
   final PageController _pageController = PageController();
   int _currentPage1 = 0;
   final List<String> bannerTexts = [
-    "Get Your\nSpecial Sale\nUp to 40%",
-    "Summer\nExclusive Deal\nUp to 50%",
-    "Limited\nTime Offer\nUp to 60%",
+    "Get Your\nSpecial Sale\nUp to 30%",
+    "Summer\nExclusive Deal\nDont Miss out",
+    "Limited\nTime Offer",
   ];
   final TextEditingController SearchController = TextEditingController();
   final FocusNode SearchFocusNode = FocusNode();
@@ -1515,18 +1490,18 @@ class SaleBanner extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  ),
-                  child: const Text("Shop Now"),
-                ),
+                // ElevatedButton(
+                //   onPressed: () {},
+                //   style: ElevatedButton.styleFrom(
+                //     backgroundColor: Colors.white,
+                //     foregroundColor: Colors.black,
+                //     shape: RoundedRectangleBorder(
+                //       borderRadius: BorderRadius.circular(30),
+                //     ),
+                //     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                //   ),
+                //   child: const Text("Shop Now"),
+                // ),
                 const SizedBox(height: 16),
                 Row(
                   children: List.generate(totalPages, (dotIndex) {
@@ -1548,11 +1523,31 @@ class SaleBanner extends StatelessWidget {
           const SizedBox(width: 10),
           ClipRRect(
             borderRadius: BorderRadius.circular(40),
-            child: Image.asset(
-              'asset/dragon.png',
-              height: 220,
-              width: 150,
-              fit: BoxFit.cover,
+            child: GestureDetector(
+              onTap: (){
+                // Navigator.push(context, MaterialPageRoute(builder: (context)=>()));
+              },
+              child: Image.network(
+                'https://plus.unsplash.com/premium_photo-1701180529217-f2270f92f01f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTE4fHxzYWxlfGVufDB8fDB8fHww',
+                height: 200,
+                width: 150,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return SizedBox(
+                    height: 220,
+                    width: 150,
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return SizedBox(
+                    height: 220,
+                    width: 150,
+                    child: Center(child: Icon(Icons.broken_image, color: Colors.grey)),
+                  );
+                },
+              ),
             ),
           ),
         ],

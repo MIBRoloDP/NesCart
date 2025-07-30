@@ -39,11 +39,9 @@ class _WishlistPageState extends State<WishlistPage> {
         itemCount: wishlist.length,
         itemBuilder: (context, index) {
           final item = wishlist[index];
-
           final imageString = item['image'] ?? '';
           final title = item['title'] ?? item['name'] ?? 'No Title';
           final price = item['price']?.toString() ?? '0';
-
           Widget imageWidget;
           try {
             if (imageString.isNotEmpty) {
@@ -59,7 +57,6 @@ class _WishlistPageState extends State<WishlistPage> {
           } catch (_) {
             imageWidget = const Icon(Icons.broken_image);
           }
-
           return Card(
             margin: const EdgeInsets.all(10),
             child: ListTile(

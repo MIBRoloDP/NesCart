@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:neskart/support_chat.dart';
 
 class MessageScreen extends StatefulWidget {
   @override
@@ -67,8 +68,18 @@ class _MessageScreenState extends State<MessageScreen> {
                 duration: const Duration(milliseconds: 100),
                 child: Row(
                   children: [
-                    Icon(Icons.chat,
-                    color: Colors.green,
+                    GestureDetector(
+                      onTap: (){
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SupportChatScreen(),
+                          ),
+                        );
+                      },
+                      child: Icon(Icons.chat,
+                      color: Colors.green,
+                      ),
                     ), Icon(Icons.inventory,
 
                     color: Colors.blue,), Icon(Icons.flash_on,
@@ -101,55 +112,40 @@ class _MessageScreenState extends State<MessageScreen> {
                             ),
                           ),
                         ),
-                        Row(
-                          children: [
-                            Icon(Icons.cleaning_services_outlined,
-                                size: 16, color: Colors.black),
-                            const SizedBox(width: 4),
-                            Text(
-                              "Mark all as read",
-                              style: TextStyle(color: Colors.black),
-                            ),
-                          ],
-                        ),
+                        // Row(
+                        //   children: [
+                        //     Icon(Icons.cleaning_services_outlined,
+                        //         size: 16, color: Colors.black),
+                        //     const SizedBox(width: 4),
+                        //     Text(
+                        //       "Mark all as read",
+                        //       style: TextStyle(color: Colors.black),
+                        //     ),
+                        //   ],
+                        // ),
                       ],
                     ),
                     const SizedBox(height: 20),
-                    // CORRECTED SECTION:
-                    // The AnimatedBuilder needs to be directly within the background
-                    // to access the FlexibleSpaceBarSettings provided by the FlexibleSpaceBar.
                     AnimatedOpacity(
                       opacity: _isScrolledDown ? 0.0 : 1.0,
                       duration: const Duration(milliseconds: 200),
-                      child: LayoutBuilder( // Using LayoutBuilder to get constraints if needed, or simply return AnimatedBuilder
+                      child: LayoutBuilder(
                           builder: (context, constraints) {
                             return AnimatedBuilder(
                               animation: _scrollController,
                               builder: (context, child) {
                                 final settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
                                 if (settings == null) {
-                                  // Fallback or a placeholder if settings are not available
                                   return const SizedBox.shrink(); // Or a default row
                                 }
-
-                                // Calculate the scroll progress from 0.0 (expanded) to 1.0 (collapsed)
-                                // settings.currentExtent decreases from maxExtent to minExtent
-                                // So, t should go from 1.0 (expanded) to 0.0 (collapsed)
                                 final double deltaExtent = settings.maxExtent - settings.minExtent;
-                                // Ensure deltaExtent is not zero to avoid division by zero
                                 final double t = deltaExtent > 0 ? ((settings.currentExtent - settings.minExtent) / deltaExtent).clamp(0.0, 1.0) : 0.0;
-
-
-                                // Calculate scaled size for icons
-                                // We want them to scale from normal size (t=1) to smaller (t=0)
-                                // Max radius for circle avatar: 22 (from your original code)
-                                // Let's make them shrink to a smaller size, not completely disappear, e.g., radius 5, icon 10, text 0
                                 const double maxRadius = 22;
                                 const double minRadius = 5;
-                                const double maxIconSize = 24; // Assuming icon size inside 22 radius
+                                const double maxIconSize = 24;
                                 const double minIconSize = 10;
-                                const double maxTextSize = 12; // Your original text size
-                                const double minTextSize = 0; // Text can disappear
+                                const double maxTextSize = 12;
+                                const double minTextSize = 0;
 
                                 final double currentRadius = Tween<double>(begin: minRadius, end: maxRadius).evaluate(AlwaysStoppedAnimation(t));
                                 final double currentIconSize = Tween<double>(begin: minIconSize, end: maxIconSize).evaluate(AlwaysStoppedAnimation(t));

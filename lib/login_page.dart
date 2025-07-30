@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:neskart/home_page.dart';
+import 'package:neskart/reset_password.dart';
 import 'package:neskart/vendor/admin_dashboard.dart';
 import 'signup.dart';
 import 'bottom_nav.dart';
@@ -8,6 +9,9 @@ import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:flutter/services.dart';
+import 'dart:developer';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,6 +21,9 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  List<BiometricType> _availableBiometrics = [];
+  bool _canCheckBiometrics = false;
+  final LocalAuthentication auth = LocalAuthentication();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController EmailController = TextEditingController();
   final TextEditingController PasswordController = TextEditingController();
@@ -68,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
            builder: (context) => isAdmin ? AdminDashboard() : bottomnav(),
          ),
        )
-           :   Fluttertoast.showToast(msg: "User blocked by admin, Contact IT Manager");
+           :Fluttertoast.showToast(msg: "User blocked by admin, Contact IT Manager");
         } else {
           Fluttertoast.showToast(msg: "User document does not exist.");
           log("Document not found for user: ${user.uid}");
@@ -79,17 +86,13 @@ class _LoginScreenState extends State<LoginScreen> {
       log("Login error: $e");
     }
   }
-
   bool rememberMe = false;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-
-
           Padding(
             padding: const EdgeInsets.only(top: 35,left: 90),
             child: Container(
@@ -237,7 +240,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         Padding(
                           padding: EdgeInsets.only(left: 99),
                           child: GestureDetector(
-                            onTap: () {},
+                            onTap: () {
+                                log("");
+                                Navigator.push(context, MaterialPageRoute(builder: (
+                                    context) =>ResetPassword()));
+                            },
                             child: Text(
                               "Forgot Password?",
                               style: TextStyle(
@@ -289,23 +296,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     SizedBox(height: 20),
                 
                     Center(
-                      child: OutlinedButton.icon(
-                        onPressed: () {},
-                        label: Text(
-                          "Sign In with Google",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey,
-                            fontSize: 14,
-                          ),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.white),
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 14,
-                            horizontal: 24,
-                          ),
-                        ),
+                      child:   ElevatedButton(
+                          onPressed: _authenticateWithBiometrics, child: Icon(
+                        Icons.fingerprint,
+                      )
                       ),
                     ),
                 
@@ -324,10 +318,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         SizedBox(width: 10),
                         GestureDetector(
                           onTap: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => SignupScreen(),
+                            Navigator.pushReplacement(context, MaterialPageRoute(
+                              builder: (context) => SignupScreen(),
                               ),
                             );
                           },
@@ -351,4 +343,53 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+  Future<void> _authenticateWithBiometrics() async {
+    try {
+      bool didAuthenticate = await auth.authenticate(
+        localizedReason: 'Please authenticate to login',
+        options: const AuthenticationOptions(
+          biometricOnly: false,
+          stickyAuth: true,
+        ),
+      );
+      if (didAuthenticate) {
+        log("logged in");
+      }
+      if (didAuthenticate) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => homepage()),
+        );
+      } else {
+        // Optional: Show error or retry
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Authentication failed')),
+        );
+      }
+    } on PlatformException catch (e) {
+      if (e.code == 'LockedOut') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Too many failed attempts. Please try again in 30 seconds.",
+              style: TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+        debugPrint(e.toString());
+      }
+    }
+  }
+  Future<void> _checkBiometrics() async {
+    try {
+      _canCheckBiometrics = await auth.canCheckBiometrics;
+      _availableBiometrics = await auth.getAvailableBiometrics();
+      log("Available Biometrics: $_availableBiometrics");
+    } on PlatformException catch (e) {
+      debugPrint("Biometric error: $e");
+    }
+    setState(() {});
+  }
 }
+
