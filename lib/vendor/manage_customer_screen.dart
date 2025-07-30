@@ -9,6 +9,31 @@ class ManageCustomersScreen extends StatefulWidget {
 }
 
 class _ManageCustomersScreenState extends State<ManageCustomersScreen> {
+  Map<String, int> userOrderCounts = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchOrderCounts();
+  }
+
+  Future<void> _fetchOrderCounts() async {
+    final snapshot = await FirebaseFirestore.instance.collection('orders').get();
+    final Map<String, int> counts = {};
+
+    for (var doc in snapshot.docs) {
+      final data = doc.data();
+      final userId = data['userId'];
+      if (userId != null) {
+        counts[userId] = (counts[userId] ?? 0) + 1;
+      }
+    }
+
+    setState(() {
+      userOrderCounts = counts;
+    });
+  }
+
   Future<void> toggleUserStatus(String userId, String currentStatus) async {
     final newStatus = currentStatus == 'Blocked' ? 'Active' : 'Blocked';
 
@@ -21,7 +46,7 @@ class _ManageCustomersScreenState extends State<ManageCustomersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFe8dfd4),
+      backgroundColor: const Color(0xFFe8dfd4),
       appBar: AppBar(
         title: const Text('Manage Customers'),
         backgroundColor: Colors.black,
@@ -33,7 +58,6 @@ class _ManageCustomersScreenState extends State<ManageCustomersScreen> {
             .collection('users')
             .where('admin', isEqualTo: false)
             .snapshots(),
-
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const Center(child: Text('Something went wrong'));
@@ -59,7 +83,8 @@ class _ManageCustomersScreenState extends State<ManageCustomersScreen> {
               final name = data['name'] ?? 'Unnamed';
               final email = data['email'] ?? 'No Email';
               final status = data['status'] ?? 'Active';
-              final orders = data['orders'] ?? 0;
+              final userId = user.id;
+              final orderCount = userOrderCounts[userId] ?? 0;
 
               return Card(
                 elevation: 2,
@@ -73,26 +98,32 @@ class _ManageCustomersScreenState extends State<ManageCustomersScreen> {
                     children: [
                       const SizedBox(height: 4),
                       Text('Email: $email'),
-                      Text('Total Orders: $orders'),
+                      Text('Total Orders: $orderCount'),
                     ],
                   ),
                   trailing: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                      status == 'Blocked' ? Colors.green : Colors.redAccent,
+                      backgroundColor: status == 'Blocked'
+                          ? Colors.green
+                          : Colors.redAccent,
                     ),
                     onPressed: () async {
                       await toggleUserStatus(user.id, status);
 
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text(status == 'Blocked'
-                              ? 'Unblocked $name'
-                              : 'Blocked $name'),
+                          content: Text(
+                            status == 'Blocked'
+                                ? 'Unblocked $name'
+                                : 'Blocked $name',
+                          ),
                         ),
                       );
                     },
-                    child: Text(status == 'Blocked' ? 'Unblock' : 'Block', style: TextStyle(color: Colors.white),),
+                    child: Text(
+                      status == 'Blocked' ? 'Unblock' : 'Block',
+                      style: const TextStyle(color: Colors.white),
+                    ),
                   ),
                 ),
               );

@@ -1,9 +1,7 @@
-import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:neskart/bottom_nav.dart';
-import 'package:neskart/cart.dart';
-import 'package:neskart/orderpage.dart';
+import 'orderpage.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -13,276 +11,137 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  String? imagePath;
+  String? userName;
+  String? userEmail;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserData();
+  }
+
+  Future<void> fetchUserData() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      final data = doc.data();
+      if (data != null) {
+        setState(() {
+          userName = data['name'] ?? 'Unnamed User';
+          userEmail = data['email'] ?? '';
+          isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: Colors.black,
-        centerTitle: true,
-        title: const Text(
-          "Profile Page",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      backgroundColor: const Color(0xFFEDEDED),
+      body: Stack(
         children: [
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () async {
-                  try {
-                    final file = await ImagePicker().pickImage(
-                      source: ImageSource.gallery,
-                    );
-
-                    if (file == null) return;
-
-                    setState(() {
-                      imagePath = file.path;
-                    });
-                  } catch (e) {
-                    debugPrint('Error picking image: $e');
-                  }
-                },
-                child: ClipOval(
-                  child: SizedBox(
-                    width: 70,
-                    height: 70,
-                    child: ColoredBox(
-                      color: Colors.grey[300]!,
-                      child: imagePath != null
-                          ? Image.file(
-                        File(imagePath!),
-                        fit: BoxFit.cover,
-                      )
-                          : Icon(
-                        Icons.add_a_photo,
-                        size: 30,
-                        color: Colors.grey[700],
-                      ),
+          Padding(
+            padding: const EdgeInsets.only(top: 5, left: 1),
+            child: Container(
+              width: double.infinity,
+              color: Colors.white,
+              padding: const EdgeInsets.only(top: 80, bottom: 30),
+              child: Column(
+                children: [
+                  const CircleAvatar(
+                    radius: 40,
+                    backgroundImage: AssetImage('asset/dragon.png'),
+                  ),
+                  const SizedBox(height: 10),
+                  isLoading
+                      ? const CircularProgressIndicator()
+                      : Text(
+                    userName ?? 'Loading...',
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                    'Dev Pradhan',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 4),
-                  Text(' ', style: TextStyle(fontSize: 12)),
+                  const SizedBox(height: 4),
+                  if (!isLoading && userEmail != null)
+                    Text(
+                      userEmail!,
+                      style: const TextStyle(color: Colors.black54, fontSize: 14),
+                    ),
                 ],
               ),
-              const Spacer(),
-            ],
+            ),
           ),
-          const SizedBox(height: 24),
-
-          // Orders
-          const Text(
-            'My Orders',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => OrderPage()),
-                  );
-                },
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.65,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: Color(0xFFe8dfd4),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: SingleChildScrollView(
                 child: Column(
-                  children: const [
-                    Icon(Icons.local_shipping, color: Colors.black),
-                    SizedBox(height: 4),
-                    Text('To Ship', style: TextStyle(fontSize: 12)),
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildProfileOption(
+                      icon: Icons.shopping_cart,
+                      label: 'My Cart',
+                      onTap: () {},
+                    ),
+                    _buildProfileOption(
+                      icon: Icons.shopping_bag,
+                      label: 'My Orders',
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const OrderPage()));
+                      },
+                    ),
+                    const SizedBox(height: 12),
                   ],
                 ),
               ),
-              Column(
-                children: const [
-                  Icon(Icons.reviews, color: Colors.black),
-                  SizedBox(height: 4),
-                  Text('To Review', style: TextStyle(fontSize: 12)),
-                ],
-              ),
-              Column(
-                children: const [
-                  Icon(Icons.local_fire_department_outlined,
-                      color: Colors.black),
-                  SizedBox(height: 4),
-                  Text('Hot', style: TextStyle(fontSize: 12)),
-                ],
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 24),
-
-          // Promotion Cards
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFe8dfd4),
-                    border: Border.all(color: Colors.black),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Get Up to 70% OFF\nwith latest Offers!!!',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => bottomnav()),
-                          );
-                        },
-                        child: const Text(
-                          'Explore',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFe8dfd4),
-                    border: Border.all(color: Colors.black),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Have Fun Shopping\nwith us!!!',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => bottomnav()),
-                          );
-                        },
-                        child: const Text(
-                          'Shop Now',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 24),
-
-          // More Options
-          const Text(
-            'More Options',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                Column(
-                  children: const [
-                    Icon(Icons.mail, size: 28),
-                    SizedBox(height: 6),
-                    Text("My Messages", style: TextStyle(fontSize: 12)),
-                  ],
-                ),
-                const SizedBox(width: 20),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => cart()));
-                  },
-                  child: Column(
-                    children: const [
-                      Icon(Icons.shopping_cart, size: 28),
-                      SizedBox(height: 6),
-                      Text("My Cart", style: TextStyle(fontSize: 12)),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 20),
-                Column(
-                  children: const [
-                    Icon(Icons.support_agent, size: 28),
-                    SizedBox(height: 6),
-                    Text("Customer Care", style: TextStyle(fontSize: 12)),
-                  ],
-                ),
-                const SizedBox(width: 20),
-                Column(
-                  children: const [
-                    Icon(Icons.reviews, size: 28),
-                    SizedBox(height: 6),
-                    Text("My Reviews", style: TextStyle(fontSize: 12)),
-                  ],
-                ),
-                const SizedBox(width: 20),
-                Column(
-                  children: const [
-                    Icon(Icons.help, size: 28),
-                    SizedBox(height: 6),
-                    Text("Help Center", style: TextStyle(fontSize: 12)),
-                  ],
-                ),
-                const SizedBox(width: 20),
-                Column(
-                  children: const [
-                    Icon(Icons.payment, size: 27),
-                    SizedBox(height: 6),
-                    Text("My Payments", style: TextStyle(fontSize: 12)),
-                  ],
-                ),
-              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildProfileOption({required IconData icon, required String label, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 4,
+              offset: Offset(1, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.black),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
+            ),
+             Icon(Icons.arrow_forward_ios, size: 16, color: Colors.black),
+          ],
+        ),
       ),
     );
   }

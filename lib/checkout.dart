@@ -305,7 +305,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
           'tax': 100.0,
           'subtotal': widget.price,
           'paymentMethod': selectedPaymentMethod?.name ?? 'unknown',
-          'status': 'completed',
+          'status': 'order placed',
           'deliveryAddress':{
             'lat':latitude,
             'lng':longitude,
@@ -338,7 +338,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
               'tax': 100.0,
               'subtotal': widget.price,
               'paymentMethod': selectedPaymentMethod?.name ?? 'unknown',
-              'status': 'completed',
+              'status': 'order placed',
               'deliveryAddress':{
                 'lat':latitude,
                 'lng':longitude,
@@ -381,7 +381,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
           'tax': 100.0,
           'subtotal': widget.price,
           'paymentMethod': selectedPaymentMethod?.name ?? 'unknown',
-          'status': 'completed',
+          'status': 'order placed',
           'deliveryAddress':{
             'lat':latitude,
             'lng':longitude,
@@ -414,7 +414,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
               'tax': 100.0,
               'subtotal': widget.price,
               'paymentMethod': selectedPaymentMethod?.name ?? 'unknown',
-              'status': 'completed',
+              'status': 'order placed',
               'deliveryAddress':{
                 'lat':latitude,
                 'lng':longitude,

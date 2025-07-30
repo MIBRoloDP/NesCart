@@ -1,122 +1,94 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:developer';
+
 class OrderTrackingMap extends StatefulWidget {
   final String orderId;
+
   const OrderTrackingMap({Key? key, required this.orderId}) : super(key: key);
+
   @override
   State<OrderTrackingMap> createState() => _OrderTrackingMapState();
 }
+
 class _OrderTrackingMapState extends State<OrderTrackingMap> {
   final MapController _mapController = MapController();
-  Map<String,dynamic>?_orderData;
+  Map<String, dynamic>? _orderData;
   bool _isLoading = true;
   List<Marker> _markers = [];
-  List<Polyline> _polylines = [];
+
   @override
   void initState() {
     super.initState();
     _fetchOrderData();
   }
+
   Future<void> _fetchOrderData() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        setState(() {
-          _isLoading = false;
-        });
-        return;
-      }
-      final docSnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
+      if (user == null) return;
+
+      final snapshot = await FirebaseFirestore.instance
           .collection('orders')
           .doc(widget.orderId)
           .get();
-      if (docSnapshot.exists) {
-        setState(() {
-          _orderData = docSnapshot.data();
-          _isLoading = false;
-        });
-        _setupMarkers();
-      } else {
-        log('Order document not found');
-        setState(() {
-          _isLoading = false;
-        });
+
+      if (!snapshot.exists) throw Exception('Order not found');
+      final data = snapshot.data();
+      if (data == null || data['userId'] != user.uid) {
+        throw Exception('Unauthorized or invalid order access');
       }
-    } catch (e) {
-      log('Error fetching order data: $e');
+
       setState(() {
+        _orderData = data;
         _isLoading = false;
       });
+
+      _setupMarkers();
+    } catch (e) {
+      log('Order fetch error: $e');
+      setState(() => _isLoading = false);
     }
   }
+
   void _setupMarkers() {
     if (_orderData == null) return;
+
     List<Marker> markers = [];
-    List<LatLng> points = []; // officeAdress , deliveryAddress , currentAddress
-    // List<LatLng> points1 = [LatLng(27.7, 85.3117), LatLng(27.747471,85.364367), LatLng(27.7, 85.3117)];
-    if (_orderData!.containsKey('officeAddress')) {
-      final officeLatLng = LatLng(
-        _orderData!['officeAddress']['lat'],
-        _orderData!['officeAddress']['lng'],
-      );
-      points.add(officeLatLng);
-      markers.add(
-        Marker(
-          point: officeLatLng,
+    List<LatLng> points = [];
+
+    void addMarkerIfPresent(String key, Color color, String label) {
+      if (_orderData!.containsKey(key)) {
+        final location = _orderData![key];
+        final latLng = LatLng(location['lat'], location['lng']);
+        points.add(latLng);
+        markers.add(Marker(
+          point: latLng,
           width: 80,
           height: 80,
-          child: _buildCustomMarker(Colors.blue, 'Office'),
-        ),
-      );
+          child: _buildCustomMarker(color, label),
+        ));
+      }
     }
-    if (_orderData!.containsKey('deliveryAddress')) {
-      final deliveryLatLng = LatLng(
-        _orderData!['deliveryAddress']['lat'],
-        _orderData!['deliveryAddress']['lng'],
-      );
-      points.add(deliveryLatLng);
-      markers.add(
-        Marker(
-          point: deliveryLatLng,
-          width: 80,
-          height: 80,
-          child: _buildCustomMarker(Colors.green, 'Delivery'),
-        ),
-      );
-    }
-    if (_orderData!.containsKey('currentAddress')) {
-      final currentLatLng = LatLng(
-        _orderData!['currentAddress']['lat'],
-        _orderData!['currentAddress']['lng'],
-      );
-      points.add(currentLatLng);
-      markers.add(
-        Marker(
-          point: currentLatLng,
-          width: 80,
-          height: 80,
-          child: _buildCustomMarker(Colors.red, 'Current'),
-        ),
-      );
-    }
-    setState(() {
-      _markers = markers;
-      log(points.toString());
-    });
-    if (points.isNotEmpty) {
-      _fitAllMarkers(points);
-    }
+
+    addMarkerIfPresent('officeAddress', Colors.blue, 'Office');
+    addMarkerIfPresent('deliveryAddress', Colors.green, 'Delivery');
+    addMarkerIfPresent('currentAddress', Colors.red, 'Current');
+
+    setState(() => _markers = markers);
+    if (points.isNotEmpty) _fitMarkersToBounds(points);
   }
+
   Widget _buildCustomMarker(Color color, String label) {
     return Column(
       children: [
         Container(
+          width: 20,
+          height: 20,
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
@@ -129,8 +101,6 @@ class _OrderTrackingMapState extends State<OrderTrackingMap> {
               ),
             ],
           ),
-          width: 20,
-          height: 20,
         ),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
@@ -157,63 +127,66 @@ class _OrderTrackingMapState extends State<OrderTrackingMap> {
       ],
     );
   }
-  void _fitAllMarkers(List<LatLng> points) {
+
+  void _fitMarkersToBounds(List<LatLng> points) {
     if (points.isEmpty) return;
-    double minLat = 90.0;
-    double maxLat = -90.0;
-    double minLng = 180.0;
-    double maxLng = -180.0;
-    for (final point in points) {
-      if (point.latitude < minLat) minLat = point.latitude;
-      if (point.latitude > maxLat) maxLat = point.latitude;
-      if (point.longitude < minLng) minLng = point.longitude;
-      if (point.longitude > maxLng) maxLng = point.longitude;
-    }
-    // Add padding
-    final paddingDegrees = 0.005;
-    // Calculate center point
+
+    double minLat = points.map((p) => p.latitude).reduce((a, b) => a < b ? a : b);
+    double maxLat = points.map((p) => p.latitude).reduce((a, b) => a > b ? a : b);
+    double minLng = points.map((p) => p.longitude).reduce((a, b) => a < b ? a : b);
+    double maxLng = points.map((p) => p.longitude).reduce((a, b) => a > b ? a : b);
+
     final centerLat = (minLat + maxLat) / 2;
     final centerLng = (minLng + maxLng) / 2;
-    // Calculate appropriate zoom level based on bounds
-    double latDelta = (maxLat + paddingDegrees) - (minLat - paddingDegrees);
-    double lngDelta = (maxLng + paddingDegrees) - (minLng - paddingDegrees);
-    // Use larger of the two deltas to determine zoom
-    double maxDelta = latDelta > lngDelta ? latDelta : lngDelta;
-    // Rough estimate of appropriate zoom level
-    double zoom = 12.0;
-    if (maxDelta <= 0.01) zoom = 15.0;
-    else if (maxDelta <= 0.05) zoom = 13.0;
-    else if (maxDelta <= 0.1) zoom = 12.0;
-    else if (maxDelta <= 0.5) zoom = 10.0;
-    else zoom = 8.0;
-    // Move map to show all markers
+
+    final latDelta = maxLat - minLat;
+    final lngDelta = maxLng - minLng;
+    final maxDelta = [latDelta, lngDelta].reduce((a, b) => a > b ? a : b);
+
+    double zoom = 12;
+    if (maxDelta <= 0.01) zoom = 15;
+    else if (maxDelta <= 0.05) zoom = 13;
+    else if (maxDelta <= 0.1) zoom = 12;
+    else if (maxDelta <= 0.5) zoom = 10;
+    else zoom = 8;
+
     _mapController.move(LatLng(centerLat, centerLng), zoom);
   }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return Colors.orange;
+      case 'processing':
+        return Colors.blue;
+      case 'shipped':
+        return Colors.teal;
+      case 'delivered':
+        return Colors.green;
+      case 'cancelled':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final defaultLocation = LatLng(27.7000, 85.3117);
+
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
+
     if (_orderData == null) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Order Tracking'),
-        ),
-        body: const Center(
-          child: Text('Order data not found'),
-        ),
+        appBar: AppBar(title: const Text('Order Tracking')),
+        body: const Center(child: Text('Order not found')),
       );
     }
-    // Default location (fallback to Nepal if no locations are available)
-    final defaultLocation = LatLng(27.7000, 85.3117);
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Order #${widget.orderId}'),
-      ),
+      appBar: AppBar(title: Text('Order #${widget.orderId}')),
       body: Column(
         children: [
           Expanded(
@@ -228,92 +201,74 @@ class _OrderTrackingMapState extends State<OrderTrackingMap> {
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                   userAgentPackageName: 'com.example.app',
                 ),
-                // PolylineLayer(polylines: _polylines),
                 MarkerLayer(markers: _markers),
               ],
             ),
           ),
-          // Legend
-          Container(
-            padding: const EdgeInsets.all(16),
-            color: Colors.white,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Map Legend',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
+
+          if (_orderData!.containsKey('status'))
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              color: Colors.white,
+              child: Row(
+                children: [
+                  const Text(
+                    'Order Status: ',
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Container(
-                      width: 16,
-                      height: 16,
-                      decoration: const BoxDecoration(
-                        color: Colors.blue,
-                        shape: BoxShape.circle,
-                      ),
+                  Text(
+                    _orderData!['status'],
+                    style: TextStyle(
+                      color: _getStatusColor(_orderData!['status']),
+                      fontWeight: FontWeight.w600,
                     ),
-                    const SizedBox(width: 8),
-                    const Text('Office Location'),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Container(
-                      width: 16,
-                      height: 16,
-                      decoration: const BoxDecoration(
-                        color: Colors.green,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    const Text('Delivery Location'),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Container(
-                      width: 16,
-                      height: 16,
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    const Text('Current Location'),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Container(
-                      width: 16,
-                      height: 4,
-                      decoration: const BoxDecoration(
-                        color: Colors.orange,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    const Text('Delivery Route'),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  '© Dev',
-                  style: TextStyle(fontSize: 10, color: Colors.grey),
-                ),
-              ],
+                  ),
+                ],
+              ),
+            ),
+
+          _buildLegend(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegend() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      color: Colors.white,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Map Legend', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          const SizedBox(height: 8),
+          _buildLegendItem(Colors.blue, 'Office Location'),
+          _buildLegendItem(Colors.green, 'Delivery Location'),
+          _buildLegendItem(Colors.red, 'Current Location'),
+          _buildLegendItem(Colors.orange, 'Delivery Route', isLine: true),
+          const SizedBox(height: 8),
+          const Text('© NestCart', style: TextStyle(fontSize: 10, color: Colors.grey)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegendItem(Color color, String label, {bool isLine = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          Container(
+            width: isLine ? 16 : 16,
+            height: isLine ? 4 : 16,
+            decoration: BoxDecoration(
+              color: color,
+              shape: isLine ? BoxShape.rectangle : BoxShape.circle,
             ),
           ),
+          const SizedBox(width: 8),
+          Text(label),
         ],
       ),
     );
