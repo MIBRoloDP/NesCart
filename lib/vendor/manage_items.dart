@@ -35,6 +35,26 @@ class _ManageItemsScreenState extends State<ManageItemsScreen>
     super.dispose();
   }
 
+
+  Map<String, String> _categoryNameMap = {};
+
+  Future<void> _loadCategories() async {
+    final firestore = FirebaseFirestore.instance;
+    final collections = ['categories', 'flash_categories', 'tab_categories'];
+
+    final futures = collections.map((collection) async {
+      final snap = await firestore.collection(collection).get();
+      for (final doc in snap.docs) {
+        final data = doc.data();
+        _categoryNameMap[doc.id] = data['name'] ?? 'Unnamed';
+      }
+    });
+
+    await Future.wait(futures);
+  }
+
+
+
   Widget _buildProductsTab() {
     return Column(
       children: [
@@ -71,96 +91,107 @@ class _ManageItemsScreenState extends State<ManageItemsScreen>
           ),
         ),
         Expanded(
-          child: StreamBuilder<QuerySnapshot>(
-            stream: (_selectedCategory == null)
-                ? FirebaseFirestore.instance.collection('products').snapshots()
-                : FirebaseFirestore.instance
-                .collection('products')
-                .where('category', isEqualTo: _selectedCategory)
-                .snapshots(),
+          child: FutureBuilder(
+            future: _loadCategories(),
             builder: (context, snapshot) {
-              if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
-              final products = snapshot.data!.docs;
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-              if (products.isEmpty) return const Center(child: Text('No products found.'));
+              return StreamBuilder<QuerySnapshot>(
+                stream: (_selectedCategory == null)
+                    ? FirebaseFirestore.instance.collection('products').snapshots()
+                    : FirebaseFirestore.instance
+                    .collection('products')
+                    .where('category', isEqualTo: _selectedCategory)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                  final products = snapshot.data!.docs;
 
-              return ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: products.length,
-                itemBuilder: (context, index) {
-                  final product = products[index].data() as Map<String, dynamic>;
-                  final productId = products[index].id;
+                  if (products.isEmpty) return const Center(child: Text('No products found.'));
 
-                  return Card(
-                    elevation: 3,
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      title: Text(product['name'] ?? 'Unnamed product'),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 4),
-                          Text('Price: ₹${product['price'] ?? 'N/A'}'),
-                          Text('Stock: ${product['stock'] ?? 'N/A'} units'),
-                          Text('Category: ${product['category'] ?? 'Uncategorized'}'),
-                        ],
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.blue),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => EditProductPage(
-                                    productId: productId,
-                                    productData: product,
-                                  ),
-                                ),
-                              );
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+                      final product = products[index].data() as Map<String, dynamic>;
+                      final productId = products[index].id;
 
-                            },
+                      final categoryId = product['categoryId'];
+                      final categoryName = _categoryNameMap[categoryId] ?? 'Uncategorized';
+
+                      return Card(
+                        elevation: 3,
+                        margin: const EdgeInsets.only(bottom: 12),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          title: Text(product['name'] ?? 'Unnamed product'),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 4),
+                              Text('Price: Rs ${product['price'] ?? 'N/A'}'),
+                              Text('Category: $categoryName'),
+                            ],
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () async {
-                              final confirm = await showDialog<bool>(
-                                context: context,
-                                builder: (ctx) => AlertDialog(
-                                  title: const Text('Confirm Delete'),
-                                  content: Text('Delete product "${product['name']}"?'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(ctx, false),
-                                      child: const Text('Cancel'),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit, color: Colors.blue),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => EditProductPage(
+                                        productId: productId,
+                                        productData: product,
+                                      ),
                                     ),
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(ctx, true),
-                                      child: const Text('Delete'),
+                                  );
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () async {
+                                  final confirm = await showDialog<bool>(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      title: const Text('Confirm Delete'),
+                                      content: Text('Delete product "${product['name']}"?'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(ctx, false),
+                                          child: const Text('Cancel'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(ctx, true),
+                                          child: const Text('Delete'),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                              );
-                              if (confirm == true) {
-                                await FirebaseFirestore.instance
-                                    .collection('products')
-                                    .doc(productId)
-                                    .delete();
-                              }
-                            },
+                                  );
+                                  if (confirm == true) {
+                                    await FirebaseFirestore.instance
+                                        .collection('products')
+                                        .doc(productId)
+                                        .delete();
+                                  }
+                                },
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
+                        ),
+                      );
+                    },
                   );
                 },
               );
             },
           ),
-        ),
+        )
+
       ],
     );
   }

@@ -206,7 +206,7 @@ class _MessageScreenState extends State<MessageScreen> {
                 } else {
                   return _buildMessageCard(
                     "Shop Without Worries🤗",
-                    "Claim voucher to enjoy Free Delivery at ₹499 minimum spend",
+                    "Claim voucher to enjoy Free Delivery at Rs 499 minimum spend",
                     "11:30 AM",
                     "https://images.unsplash.com/photo-1516888531328-d33c9aa594a7?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8ZHJhZ29uJTVDfGVufDB8fDB8fHww",
                   );

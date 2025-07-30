@@ -155,7 +155,18 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     );
 
     return Scaffold(
-      appBar: AppBar(title: Text('Order #${widget.orderId}')),
+      appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: Colors.white,
+        ),
+          backgroundColor: Colors.black,
+          title: Text('Order #${widget.orderId}', style: TextStyle(
+            color: Colors.white,
+
+          ),),
+        centerTitle: true,
+
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
@@ -231,15 +242,15 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   color: Colors.grey,
                 ),
                 title: Text(item['name'] ?? 'Unnamed'),
-                subtitle: Text('Qty: ${item['qty']} • ₹${item['price']}'),
+                subtitle: Text('Qty: ${item['qty']} • Rs ${item['price']}'),
               );
             }),
 
             const Divider(height: 32),
-            Text('Subtotal: ₹${order['subtotal']}'),
-            Text('Tax: ₹${order['tax']}'),
-            Text('Shipping: ₹${order['shipping']}'),
-            Text('Total: ₹${order['total']}', style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text('Subtotal: Rs. ${order['subtotal']}'),
+            Text('Tax: Rs. ${order['tax']}'),
+            Text('Shipping: Rs. ${order['shipping']}'),
+            Text('Total: Rs. ${order['total']}', style: const TextStyle(fontWeight: FontWeight.bold)),
 
             const Divider(height: 32),
 

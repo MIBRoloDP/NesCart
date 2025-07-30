@@ -28,35 +28,38 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   Future<void> fetchDashboardData() async {
     final now = DateTime.now();
-    final ordersSnapshot =
-    await FirebaseFirestore.instance.collection('orders').get();
+    final ordersSnapshot = await FirebaseFirestore.instance.collection('orders').get();
 
     int orders = 0;
-    int todaySales = 0;
+    int todayOrderCount = 0;
     int totalRevenue = 0;
 
     for (var doc in ordersSnapshot.docs) {
       final data = doc.data();
       orders++;
 
-      final amount = data['totalAmount'] as num? ?? 0;
+      final amount = data['subtotal'] as num? ?? 0;
       totalRevenue += amount.toInt();
 
-      Timestamp timestamp = data['createdAt'];
-      DateTime orderDate = timestamp.toDate();
+      // Use the correct field
+      final Timestamp? timestamp = data['orderDate'];
+      if (timestamp == null) continue;
+
+      final DateTime orderDate = timestamp.toDate();
       if (orderDate.year == now.year &&
           orderDate.month == now.month &&
           orderDate.day == now.day) {
-        todaySales += amount.toInt();
+        todayOrderCount++;
       }
     }
 
     setState(() {
       orderCount = orders;
-      todayTotal = todaySales;
+      todayTotal = todayOrderCount;
       revenueTotal = totalRevenue;
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -87,13 +90,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
               childAspectRatio: 3 / 2,
               physics: const NeverScrollableScrollPhysics(),
               children: [
-                _DashboardCard(
-                    title: 'Total Orders', value: '$orderCount'),
-                _DashboardCard(
-                    title: "Today's Sales", value: 'Rs $todayTotal'),
-                _DashboardCard(
-                    title: 'Total Revenue', value: 'Rs $revenueTotal'),
-                const _DashboardCard(title: 'Low Stock Items', value: '10'), // You can make this dynamic later
+                _DashboardCard(title: 'Total Orders', value: '$orderCount'),
+                _DashboardCard(title: "Today's Orders", value: '$todayTotal'),
+                _DashboardCard(title: 'Total Revenue', value: 'Rs $revenueTotal'),
               ],
             ),
             const SizedBox(height: 32),
@@ -105,7 +104,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   .collection('orders')
                   .orderBy('orderDate', descending: true)
 
-                  .limit(5) // Only recent 5 orders
+                  .limit(5)
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -224,7 +223,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
             Navigator.push(context,
                 MaterialPageRoute(builder: (_) => const AdminAddItemsPage()));
           }),
-          _buildDrawerItem(Icons.inventory, 'Manage Products', () {
+          _buildDrawerItem(Icons.inventory, 'Manage Items', () {
             Navigator.push(
                 context,
                 MaterialPageRoute(
