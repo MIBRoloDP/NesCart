@@ -6,6 +6,7 @@ import 'package:neskart/Profile_page.dart';
 import 'package:neskart/login_page.dart';
 import 'package:neskart/product_detail.dart' show ProductDetailPage;
 import 'package:neskart/splash_screen.dart';
+import 'package:neskart/vendor/admin_dashboard.dart';
 import 'createProducts.dart';
 import 'newz_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -460,6 +461,14 @@ class _homepageState extends State<homepage> {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.person_pin),
+              title: const Text("Admin Panel"),
+              onTap: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) => AdminDashboard()));
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.video_call),
               title: const Text("Video"),
               onTap: () {},
@@ -472,7 +481,10 @@ class _homepageState extends State<homepage> {
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text("Logout"),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
             ),
           ],
         ),

@@ -21,7 +21,7 @@ class _SignupScreenState extends State<SignupScreen> {
   TextEditingController PasswordController = TextEditingController();
   TextEditingController NameController = TextEditingController();
   TextEditingController ConfirmPasswordController = TextEditingController();
-
+  bool _isAdmin = false;
   bool _obscureP = true;
   bool _obscureCP = true;
 
@@ -41,7 +41,7 @@ class _SignupScreenState extends State<SignupScreen> {
               'uid': user.uid,
               'email': user.email,
               'name': name,
-              'role': user,
+              'admin': _isAdmin,
 
             });
 
@@ -284,6 +284,20 @@ class _SignupScreenState extends State<SignupScreen> {
                       // ),
                       // SizedBox(height: 8),
                       //
+                      Row(
+                        children: [
+                          Checkbox(
+                            checkColor: Colors.white,
+                            value: _isAdmin,
+                            onChanged: (value) {
+                              setState(() {
+                                _isAdmin = value ?? false;
+                              });
+                            },
+                          ),
+                          const Text('Become an Admin', style: TextStyle(color: Colors.white),),
+                        ],
+                      ),
                       Container(
                         width: double.infinity,
                         child: ElevatedButton(
