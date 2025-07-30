@@ -429,22 +429,7 @@ class _homepageState extends State<homepage> {
         //     ),
         //   ),
         // ),
-        actions: [
 
-          Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AdminAddItemsPage()),
-                );
-              },
-              icon: const Icon(Icons.add, color: Colors.white, size: 30),
-            ),
-          ),
-
-        ],
         iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: Colors.black,
       ),
