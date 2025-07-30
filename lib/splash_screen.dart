@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:neskart/login_page.dart';
 import 'package:neskart/onboarding_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,10 +16,12 @@ class splashScreen extends StatefulWidget {
 
 class _splashScreenState extends State<splashScreen> {
 bool? remember_me;
+bool? onboarding;
 void checkAuth()async{
   SharedPreferences preferences = await SharedPreferences.getInstance();
   setState(() {
     remember_me= preferences.getBool("remember_me")??false;
+    onboarding= preferences.getBool("onboarding_done")??false;
   });
 
 }
@@ -27,11 +30,23 @@ void checkAuth()async{
     super.initState();
     checkAuth();
     Timer(Duration(seconds: 3),() {
-      remember_me==false?
-      Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (context)=> OnboardingPage()))
-          : Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (context)=> homepage()));
+   if(onboarding== true){
+
+     if(remember_me==false){
+       Navigator.pushReplacement(context,
+           MaterialPageRoute(builder: (context)=> LoginScreen()));
+     }
+     else
+     {
+       Navigator.pushReplacement(context,
+           MaterialPageRoute(builder: (context)=> homepage()));
+     }
+
+   }else{
+     Navigator.pushReplacement(context,
+         MaterialPageRoute(builder: (context)=> OnboardingPage()));
+   }
+
     });
 
   }

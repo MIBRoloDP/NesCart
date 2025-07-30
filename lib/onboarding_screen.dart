@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:neskart/bottom_nav.dart';
 import 'package:neskart/home_page.dart';
 import 'package:neskart/login_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
 
@@ -103,8 +104,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: ElevatedButton(
-              onPressed: () {
+              onPressed: () async{
+                SharedPreferences pref =  await SharedPreferences.getInstance();
                 if (currentPage == onboardingData.length - 1) {
+                  pref.setBool("onboarding_done", true);
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => LoginScreen()),

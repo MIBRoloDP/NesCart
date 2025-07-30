@@ -11,6 +11,7 @@ import 'package:neskart/splash_screen.dart';
 import 'package:neskart/wishlist.dart';
 
 import 'package:neskart/vendor/admin_dashboard.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'createProducts.dart';
 import 'newz_model.dart';
@@ -491,7 +492,9 @@ class _homepageState extends State<homepage> {
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text("Logout"),
-              onTap: () {
+              onTap: () async{
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                prefs.setBool("remember_me", false);
                 Navigator.pop(context);
 
                 Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>splashScreen()));
